@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><base target="_top"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GMJS Tour Manager</title><?!= include('Style'); ?></head>
+<body>
+<header class="top"><div><small>GMJS TOUR MANAGER</small><h1 id="tourTitle">Loading…</h1><p id="tourDates"></p></div><button class="refresh" onclick="load()">↻</button></header>
+<main>
+<section id="stats" class="stats"></section>
+<section class="card"><div class="sectionHead"><div><small>SEAT BOOKING</small><h2>Bus Seats</h2></div><select id="busSelect" onchange="renderBus()"></select></div><div class="legend"><span>🟢 Available</span><span>🔴 Booked</span><span>🟠 Payment Due</span></div><div id="seatMap" class="seatMap"></div></section>
+<section class="card"><div class="sectionHead"><div><small>PASSENGERS</small><h2>Passenger List</h2></div></div><input id="search" class="input" placeholder="Search name, phone or seat" oninput="renderPassengers()"><div id="passengers"></div></section>
+<section class="grid"><section class="card"><div class="sectionHead"><h2>Payments Due</h2></div><div id="dueList"></div></section><section class="card"><div class="sectionHead"><h2>Expenses</h2><button class="primary" onclick="expenseModal()">+ Add</button></div><div id="expenses"></div></section></section>
+</main>
+<nav class="nav"><button onclick="topPage()">⌂<span>Dashboard</span></button><button onclick="seatPage()">▦<span>Seats</span></button><button onclick="document.getElementById('search').focus()">♙<span>Passengers</span></button><button onclick="expenseModal()">৳<span>Expense</span></button></nav>
+<div id="modal" class="modal hidden"><div class="modalBox"><div class="modalHead"><h2 id="modalTitle"></h2><button onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+<?!= include('Script'); ?></body></html>
