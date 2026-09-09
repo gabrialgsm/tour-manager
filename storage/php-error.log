@@ -1,0 +1,220 @@
+[22-Aug-2026 14:39:47 Asia/Dhaka] PHP Warning:  Undefined array key "seat_id" in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 3
+[22-Aug-2026 14:55:41 Asia/Dhaka] PHP Warning:  Undefined array key "seat_id" in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 3
+[22-Aug-2026 18:20:59 Asia/Dhaka] Error: Call to undefined function qr_image_url() in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_print.php:7
+Stack trace:
+#0 {main}
+[22-Aug-2026 20:06:18 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php:15
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php(15): PDO->prepare()
+#1 {main}
+[22-Aug-2026 20:09:51 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:09:51 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:09:51 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:09:51 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:09:59 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:09:59 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:10:05 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:10:05 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:10:08 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:10:08 Asia/Dhaka] PHP Warning:  Undefined variable $checked in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 47
+[22-Aug-2026 20:16:42 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[22-Aug-2026 20:16:48 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[22-Aug-2026 20:16:51 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[22-Aug-2026 23:22:00 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php:19
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php(19): PDO->prepare()
+#1 {main}
+[22-Aug-2026 23:26:35 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[22-Aug-2026 23:26:38 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php:19
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php(19): PDO->prepare()
+#1 {main}
+[23-Aug-2026 00:04:43 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php:19
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php(19): PDO->prepare()
+#1 {main}
+[23-Aug-2026 00:04:54 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php:19
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/seat_plan.php(19): PDO->prepare()
+#1 {main}
+[23-Aug-2026 00:05:01 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[23-Aug-2026 00:05:09 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[23-Aug-2026 00:05:15 Asia/Dhaka] PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.id' in 'WHERE' in /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php:34
+Stack trace:
+#0 /home/rightslash-tour/htdocs/tour.rightslash.com/checkin.php(34): PDO->prepare()
+#1 {main}
+[23-Aug-2026 03:13:12 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 46
+[02-Sep-2026 11:25:14 Asia/Dhaka] Error: Undefined constant "p" in /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:274
+Stack trace:
+#0 {main}
+[02-Sep-2026 11:25:14 Asia/Dhaka] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:48) in /home/rightslash-tour/htdocs/tour.rightslash.com/bootstrap.php on line 95
+[02-Sep-2026 11:25:15 Asia/Dhaka] Error: Undefined constant "p" in /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:274
+Stack trace:
+#0 {main}
+[02-Sep-2026 11:25:15 Asia/Dhaka] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:48) in /home/rightslash-tour/htdocs/tour.rightslash.com/bootstrap.php on line 95
+[02-Sep-2026 11:25:30 Asia/Dhaka] Error: Undefined constant "p" in /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:274
+Stack trace:
+#0 {main}
+[02-Sep-2026 11:25:30 Asia/Dhaka] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at /home/rightslash-tour/htdocs/tour.rightslash.com/ticket.php:48) in /home/rightslash-tour/htdocs/tour.rightslash.com/bootstrap.php on line 95
+[02-Sep-2026 13:09:52 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[02-Sep-2026 15:21:37 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[02-Sep-2026 15:21:45 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 05:25:43 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:25:43 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:14 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:14 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:14 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:14 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:16 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:16 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:17 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:57:17 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:59:37 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:59:37 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:59:40 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 05:59:40 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/tickets.php on line 28
+[03-Sep-2026 07:18:41 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:41 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:42 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:42 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:42 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:42 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:59 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:18:59 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:19:06 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:06 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:06 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:06 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:42 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:19:42 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 07:19:58 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:58 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:58 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 07:19:58 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:14:04 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:14:04 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:14:04 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:14:04 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:15:03 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:03 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:03 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:03 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:05 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:15:05 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:15:05 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:15:05 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:15:11 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:11 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:11 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:15:11 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:17:13 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:17:13 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:17:13 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:17:13 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:17:23 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:17:23 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:17:23 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:17:23 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/passenger_form.php on line 43
+[03-Sep-2026 08:31:44 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:44 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:45 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:45 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:53 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:53 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:31:58 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:31:58 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:31:58 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:31:58 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:45:29 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:45:29 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:45:29 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:45:29 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/nav.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/dashboard.php on line 8
+[03-Sep-2026 08:49:20 Asia/Dhaka] PHP Warning:  include(/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php): Failed to open stream: No such file or directory in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 08:49:20 Asia/Dhaka] PHP Warning:  include(): Failed opening '/home/rightslash-tour/htdocs/tour.rightslash.com/partials/head.php' for inclusion (include_path='.:/usr/share/php') in /home/rightslash-tour/htdocs/tour.rightslash.com/login.php on line 3
+[03-Sep-2026 19:51:49 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:51:52 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:52:09 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:52:12 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:00 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:05 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:24 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:28 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:50 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 19:59:53 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:00:07 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:00:10 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:02:17 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:02:19 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:02:45 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:02:47 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:03:04 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:03:06 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:05:00 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:05:05 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:05:33 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:05:35 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:06:24 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:06:30 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:07:10 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:07:13 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:07:44 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:08:27 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:08:36 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:54:39 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 20:54:42 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 22:49:21 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:22:46 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:22:53 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:22:57 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:23:22 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:06 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:08 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:16 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:18 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:23 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:24 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:30 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:31 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:24:37 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:26:01 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:26:03 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:26:08 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:26:10 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:26:44 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:27:33 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:06 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:08 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:15 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:17 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:27 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:28 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:34 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:33:36 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:34:59 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:35:02 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:35:39 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:35:41 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:36:58 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:37:02 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:38:05 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[03-Sep-2026 23:38:07 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[04-Sep-2026 00:11:18 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75
+[04-Sep-2026 00:11:20 Asia/Dhaka] PHP Warning:  Undefined array key "package_price" in /home/rightslash-tour/htdocs/tour.rightslash.com/qr.php on line 75

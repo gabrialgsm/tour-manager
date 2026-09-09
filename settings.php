@@ -1,0 +1,22 @@
+<?php
+require __DIR__.'/bootstrap.php';require __DIR__.'/bootstrap_auth.php';require_login();$tid=require_tour();$t=tour_row($tid);
+if($_SERVER['REQUEST_METHOD']==='POST'){check_csrf();require_permission('settings.manage');
+ $q=db()->prepare("UPDATE tours SET name=?,start_date=?,end_date=?,default_fee=?,booking_fee=?,contact_text=? WHERE id=?");
+ $q->execute([trim($_POST['name']),$_POST['start_date']?:null,$_POST['end_date']?:null,(float)$_POST['default_fee'],(float)$_POST['booking_fee'],trim($_POST['contact_text']??''),$tid]);
+ $pdo=db();$pdo->beginTransaction();
+ try{
+   $pdo->prepare("DELETE FROM tour_contacts WHERE tour_id=?")->execute([$tid]);
+   $labels=$_POST['contact_label']??[];$phones=$_POST['contact_phone']??[];$was=$_POST['contact_whatsapp']??[];
+   $ins=$pdo->prepare("INSERT INTO tour_contacts(tour_id,label,phone,whatsapp,sort_order,active) VALUES(?,?,?,?,?,1)");
+   foreach($labels as $i=>$label){$label=trim($label);$phone=trim($phones[$i]??'');$wa=trim($was[$i]??'');if($label||$phone||$wa)$ins->execute([$tid,$label?:'Contact',$phone,$wa,$i]);}
+   $pdo->commit();flash('success','Settings and contact numbers saved.');
+ }catch(Throwable $e){$pdo->rollBack();flash('danger','Could not save contacts: '.$e->getMessage());}
+ redirect('settings.php');
+}
+$contacts=[];try{$q=db()->prepare("SELECT * FROM tour_contacts WHERE tour_id=? ORDER BY sort_order,id");$q->execute([$tid]);$contacts=$q->fetchAll();}catch(Throwable $e){}
+if(!$contacts && (($t['contact_phone']??'')||($t['contact_whatsapp']??'')))$contacts=[['label'=>'Main Contact','phone'=>$t['contact_phone']??'','whatsapp'=>$t['contact_whatsapp']??'']];
+if(!$contacts)$contacts=[['label'=>'Main Contact','phone'=>'','whatsapp'=>'']];
+?><!doctype html><html><head><?php include __DIR__.'/partials/head.php';?></head><body><?php include __DIR__.'/partials/nav.php';?><main class="wrap"><?php flash_render();?><section class="card"><h2>Current Tour Settings</h2><form method="post"><input type="hidden" name="csrf" value="<?=h(csrf())?>"><div class="formgrid"><label>Tour Name<input name="name" value="<?=h($t['name'])?>"></label><label>Start Date<input type="date" name="start_date" value="<?=h($t['start_date'])?>"></label><label>End Date<input type="date" name="end_date" value="<?=h($t['end_date'])?>"></label><label>Default Package Fee<input type="number" name="default_fee" value="<?=h($t['default_fee'])?>"></label><label>Default Booking Fee<input type="number" name="booking_fee" value="<?=h($t['booking_fee'])?>"></label><label class="full">Public Booking Message<textarea name="contact_text" rows="2"><?=h($t['contact_text']??'Booking করতে আমাদের সাথে যোগাযোগ করুন।')?></textarea></label></div>
+<h2 style="margin-top:18px">Passenger Contact Numbers</h2><p class="muted">Public seat-plan page-এ এগুলো Call / WhatsApp হিসেবে দেখাবে। যত খুশি contact যোগ করতে পারবে।</p>
+<div id="contacts"><?php foreach($contacts as $c):?><div class="contact-row"><div class="formgrid"><label>Name / Label<input name="contact_label[]" value="<?=h($c['label']??'')?>" placeholder="e.g. Gabrial"></label><label>Phone Number<input name="contact_phone[]" value="<?=h($c['phone']??'')?>" placeholder="017XXXXXXXX"></label><label>WhatsApp Number<input name="contact_whatsapp[]" value="<?=h($c['whatsapp']??'')?>" placeholder="88017XXXXXXXX"></label></div><button type="button" class="btn danger" onclick="this.closest('.contact-row').remove()">Remove</button></div><?php endforeach;?></div>
+<button type="button" class="btn secondary" onclick="addContact()">+ Add Another Contact</button> <button class="btn primary">Save All Settings</button></form></section></main><script>function addContact(){const x=document.createElement('div');x.className='contact-row';x.innerHTML='<div class="formgrid"><label>Name / Label<input name="contact_label[]" placeholder="e.g. Gabrial"></label><label>Phone Number<input name="contact_phone[]" placeholder="017XXXXXXXX"></label><label>WhatsApp Number<input name="contact_whatsapp[]" placeholder="88017XXXXXXXX"></label></div><button type="button" class="btn danger" onclick="this.closest(\'.contact-row\').remove()">Remove</button>';document.getElementById('contacts').appendChild(x)}</script></body></html>

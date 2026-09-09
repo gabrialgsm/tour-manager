@@ -1,0 +1,1 @@
+<?php require __DIR__.'/bootstrap.php'; audit('LOGOUT'); $_SESSION=[]; session_destroy(); redirect('login.php');

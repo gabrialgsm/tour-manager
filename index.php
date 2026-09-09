@@ -1,0 +1,1 @@
+<?php require __DIR__.'/bootstrap.php'; if(is_logged_in()) redirect('dashboard.php'); redirect('login.php');
