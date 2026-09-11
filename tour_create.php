@@ -1,41 +1,12 @@
 <?php
 require_once __DIR__ . '/bootstrap_saas.php';
-saas_require_organization();
-saas_require_permission('tour.create');
-
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    saas_csrf_check();
-    $name = trim((string)($_POST['name'] ?? ''));
-    $slug = saas_slug((string)($_POST['slug'] ?? $name));
-    $start = trim((string)($_POST['start_date'] ?? ''));
-    $end = trim((string)($_POST['end_date'] ?? ''));
-    $fee = (float)($_POST['default_fee'] ?? 0);
-    $description = trim((string)($_POST['description'] ?? ''));
-
-    if ($name === '' || $slug === '') {
-        $error = 'Tour name and slug are required.';
-    } elseif ($start !== '' && $end !== '' && $end < $start) {
-        $error = 'End date cannot be before start date.';
-    } else {
-        try {
-            $db = saas_db();
-            $stmt = $db->prepare('INSERT INTO tours (organization_id, name, slug, start_date, end_date, default_fee, description, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute([saas_current_organization_id(), $name, $slug, $start ?: null, $end ?: null, $fee, $description ?: null, saas_user_id()]);
-            $tourId = (int)$db->lastInsertId();
-            $stmt = $db->prepare("INSERT INTO tour_members (tour_id, user_id, role, status) VALUES (?, ?, 'OWNER', 'ACTIVE')");
-            $stmt->execute([$tourId, saas_user_id()]);
-            saas_set_current_tour($tourId);
-            saas_audit('tour.created', 'tour', $tourId, ['name' => $name]);
-            saas_redirect('saas_dashboard.php');
-        } catch (Throwable $e) {
-            $error = 'Could not create tour. The slug may already be in use for this organization.';
-        }
-    }
+saas_require_organization(); saas_require_permission('tour.create');
+$error='';
+if ($_SERVER['REQUEST_METHOD']==='POST') {
+ saas_check_csrf(); $name=trim((string)($_POST['name']??'')); $slug=saas_slug((string)($_POST['slug']??$name)); $start=trim((string)($_POST['start_date']??'')); $end=trim((string)($_POST['end_date']??'')); $fee=max(0,(float)($_POST['default_fee']??0)); $desc=trim((string)($_POST['description']??''));
+ if($name==='') $error='Tour name is required.'; elseif($start!==''&&$end!==''&&$end<$start) $error='End date cannot be before start date.'; else try{
+  $db=saas_db(); $db->beginTransaction(); $q=$db->prepare('INSERT INTO tours (organization_id,name,slug,start_date,end_date,default_fee,description,created_by) VALUES (?,?,?,?,?,?,?,?)'); $q->execute([saas_current_organization_id(),$name,$slug,$start?:null,$end?:null,$fee,$desc?:null,saas_user_id()]); $id=(int)$db->lastInsertId();
+  $q=$db->prepare("INSERT INTO tour_members (tour_id,user_id,role,status) VALUES (?,?,'OWNER','ACTIVE')"); $q->execute([$id,saas_user_id()]); $db->commit(); saas_set_context(saas_current_organization_id(),$id); saas_audit('tour.created','tour',$id,json_encode(['name'=>$name],JSON_UNESCAPED_UNICODE)); saas_redirect('saas_dashboard.php');
+ }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();$error='Could not create tour. The slug may already be in use.';}
 }
-?>
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create tour</title>
-<style>body{font-family:Arial,sans-serif;background:#f5f7fb;margin:0}.box{max-width:620px;margin:50px auto;background:#fff;padding:32px;border-radius:14px;box-shadow:0 8px 30px #0001}input,textarea,button{width:100%;padding:12px;margin:7px 0 14px;box-sizing:border-box}button{cursor:pointer}.err{color:#b42318;margin:12px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.grid{grid-template-columns:1fr}}</style></head>
-<body><main class="box"><h1>Create your first tour</h1><p>Enter the basic details. Bus, passengers, rooms and the public page can be configured next.</p><?php if($error): ?><div class="err"><?= saas_h($error) ?></div><?php endif; ?>
-<form method="post"><input type="hidden" name="csrf_token" value="<?= saas_h(saas_csrf_token()) ?>"><label>Tour name</label><input name="name" required><label>Public slug</label><input name="slug" placeholder="kuakata-tour-2026"><div class="grid"><div><label>Start date</label><input type="date" name="start_date"></div><div><label>End date</label><input type="date" name="end_date"></div></div><label>Default fee</label><input type="number" step="0.01" min="0" name="default_fee" value="0"><label>Description</label><textarea name="description" rows="5"></textarea><button type="submit">Create tour</button></form></main></body></html>
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create tour</title><style>body{font-family:Arial,sans-serif;background:#f5f7fb;margin:0}.box{max-width:620px;margin:50px auto;background:#fff;padding:32px;border-radius:14px;box-shadow:0 8px 30px #0001}input,textarea,button{width:100%;padding:12px;margin:7px 0 14px;box-sizing:border-box}button{cursor:pointer}.err{color:#b42318;margin:12px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.grid{grid-template-columns:1fr}}</style></head><body><main class="box"><h1>Create your first tour</h1><p>Enter the basic details. Bus, passengers, rooms and the public page can be configured next.</p><?php if($error):?><div class="err"><?=saas_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><label>Tour name</label><input name="name" required><label>Public slug</label><input name="slug" placeholder="kuakata-tour-2026"><div class="grid"><div><label>Start date</label><input type="date" name="start_date"></div><div><label>End date</label><input type="date" name="end_date"></div></div><label>Default fee</label><input type="number" step="0.01" min="0" name="default_fee" value="0"><label>Description</label><textarea name="description" rows="5"></textarea><button type="submit">Create tour</button></form></main></body></html>
