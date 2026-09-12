@@ -1,6 +1,6 @@
 -- Tour Manager — clean production SaaS schema
 -- MariaDB 10.6+ / 11.x
--- This is the target schema for the rebuild. It intentionally contains no organization-specific seed data.
+-- Fresh-install target schema. No organization-specific seed data.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS=0;
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
  last_login_at DATETIME NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY (id), UNIQUE KEY uq_users_username(username), UNIQUE KEY uq_users_email(email)
+ PRIMARY KEY(id), UNIQUE KEY uq_users_username(username), UNIQUE KEY uq_users_email(email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS organizations (
@@ -40,8 +40,7 @@ CREATE TABLE IF NOT EXISTS organization_members (
  status ENUM('ACTIVE','INVITED','INACTIVE') NOT NULL DEFAULT 'ACTIVE',
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), UNIQUE KEY uq_org_member(organization_id,user_id),
- KEY idx_org_member_user(user_id),
+ PRIMARY KEY(id), UNIQUE KEY uq_org_member(organization_id,user_id), KEY idx_org_member_user(user_id),
  CONSTRAINT fk_org_member_org FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
  CONSTRAINT fk_org_member_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -60,8 +59,7 @@ CREATE TABLE IF NOT EXISTS tours (
  created_by BIGINT UNSIGNED NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), UNIQUE KEY uq_tour_org_slug(organization_id,slug),
- KEY idx_tours_org_status(organization_id,status),
+ PRIMARY KEY(id), UNIQUE KEY uq_tour_org_slug(organization_id,slug), KEY idx_tours_org_status(organization_id,status),
  CONSTRAINT fk_tours_org FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
  CONSTRAINT fk_tours_creator FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -73,8 +71,7 @@ CREATE TABLE IF NOT EXISTS tour_members (
  role ENUM('OWNER','ADMIN','MANAGER','STAFF','VIEWER') NOT NULL DEFAULT 'STAFF',
  status ENUM('ACTIVE','INVITED','INACTIVE') NOT NULL DEFAULT 'ACTIVE',
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY(id), UNIQUE KEY uq_tour_member(tour_id,user_id),
- KEY idx_tour_member_user(user_id),
+ PRIMARY KEY(id), UNIQUE KEY uq_tour_member(tour_id,user_id), KEY idx_tour_member_user(user_id),
  CONSTRAINT fk_tour_member_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE,
  CONSTRAINT fk_tour_member_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -92,7 +89,7 @@ CREATE TABLE IF NOT EXISTS passenger_profiles (
  notes TEXT NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), KEY idx_pp_org_name(organization_id,full_name), KEY idx_pp_org_phone(organization_id,phone),
+ PRIMARY KEY(id), KEY idx_pp_org_name(organization_id,full_name), KEY idx_pp_org_phone(organization_id,phone), KEY idx_pp_org_email(organization_id,email),
  CONSTRAINT fk_pp_org FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -106,8 +103,7 @@ CREATE TABLE IF NOT EXISTS tour_passengers (
  discount DECIMAL(12,2) NOT NULL DEFAULT 0,
  registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), UNIQUE KEY uq_tour_passenger(tour_id,passenger_profile_id),
- KEY idx_tp_tour_status(tour_id,status),
+ PRIMARY KEY(id), UNIQUE KEY uq_tour_passenger(tour_id,passenger_profile_id), KEY idx_tp_tour_status(tour_id,status),
  CONSTRAINT fk_tp_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE,
  CONSTRAINT fk_tp_profile FOREIGN KEY(passenger_profile_id) REFERENCES passenger_profiles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -117,7 +113,7 @@ CREATE TABLE IF NOT EXISTS buses (
  tour_id BIGINT UNSIGNED NOT NULL,
  name VARCHAR(120) NOT NULL,
  bus_number VARCHAR(80) NULL,
- layout_type ENUM('LEGACY5','2+2','2+3') NOT NULL DEFAULT '2+2',
+ layout_type ENUM('1+2','2+1','2+2','2+3','LEGACY5') NOT NULL DEFAULT '2+2',
  total_seats INT UNSIGNED NOT NULL DEFAULT 0,
  normal_rows INT UNSIGNED NOT NULL DEFAULT 0,
  front_single_count INT UNSIGNED NOT NULL DEFAULT 0,
@@ -149,8 +145,7 @@ CREATE TABLE IF NOT EXISTS passenger_seat_assignments (
  seat_id BIGINT UNSIGNED NOT NULL,
  assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  assigned_by BIGINT UNSIGNED NULL,
- PRIMARY KEY(id), UNIQUE KEY uq_tp_seat(tour_passenger_id), UNIQUE KEY uq_seat_assignment(tour_passenger_id,bus_id,seat_id),
- KEY idx_psa_seat(seat_id),
+ PRIMARY KEY(id), UNIQUE KEY uq_tp_seat(tour_passenger_id), UNIQUE KEY uq_bus_seat(bus_id,seat_id), KEY idx_psa_seat(seat_id),
  CONSTRAINT fk_psa_tp FOREIGN KEY(tour_passenger_id) REFERENCES tour_passengers(id) ON DELETE CASCADE,
  CONSTRAINT fk_psa_bus FOREIGN KEY(bus_id) REFERENCES buses(id) ON DELETE CASCADE,
  CONSTRAINT fk_psa_seat FOREIGN KEY(seat_id) REFERENCES seats(id) ON DELETE CASCADE,
@@ -176,8 +171,7 @@ CREATE TABLE IF NOT EXISTS room_assignments (
  room_id BIGINT UNSIGNED NOT NULL,
  assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  assigned_by BIGINT UNSIGNED NULL,
- PRIMARY KEY(id), UNIQUE KEY uq_room_assignment_tp(tour_passenger_id),
- KEY idx_room_assignment_room(room_id),
+ PRIMARY KEY(id), UNIQUE KEY uq_room_assignment_tp(tour_passenger_id), KEY idx_room_assignment_room(room_id),
  CONSTRAINT fk_ra_tp FOREIGN KEY(tour_passenger_id) REFERENCES tour_passengers(id) ON DELETE CASCADE,
  CONSTRAINT fk_ra_room FOREIGN KEY(room_id) REFERENCES rooms(id) ON DELETE CASCADE,
  CONSTRAINT fk_ra_user FOREIGN KEY(assigned_by) REFERENCES users(id) ON DELETE SET NULL
@@ -225,7 +219,7 @@ CREATE TABLE IF NOT EXISTS incomes (
  created_by BIGINT UNSIGNED NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  PRIMARY KEY(id), KEY idx_income_tour(tour_id),
- CONSTRAINT fk_income_tour2 FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE,
+ CONSTRAINT fk_income_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE,
  CONSTRAINT fk_income_user FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -262,8 +256,7 @@ CREATE TABLE IF NOT EXISTS tour_settings (
  setting_key VARCHAR(120) NOT NULL,
  setting_value LONGTEXT NULL,
  value_type ENUM('STRING','NUMBER','BOOLEAN','JSON') NOT NULL DEFAULT 'STRING',
- PRIMARY KEY(id), UNIQUE KEY uq_ts(tour_id,setting_key),
- CONSTRAINT fk_ts_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
+ PRIMARY KEY(id), UNIQUE KEY uq_ts(tour_id,setting_key), CONSTRAINT fk_ts_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tour_features (
@@ -272,8 +265,7 @@ CREATE TABLE IF NOT EXISTS tour_features (
  feature_key VARCHAR(120) NOT NULL,
  enabled TINYINT(1) NOT NULL DEFAULT 1,
  config_json LONGTEXT NULL,
- PRIMARY KEY(id), UNIQUE KEY uq_tf(tour_id,feature_key),
- CONSTRAINT fk_tf_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
+ PRIMARY KEY(id), UNIQUE KEY uq_tf(tour_id,feature_key), CONSTRAINT fk_tf_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tour_public_pages (
@@ -293,8 +285,7 @@ CREATE TABLE IF NOT EXISTS tour_public_pages (
  published_at DATETIME NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), UNIQUE KEY uq_public_page_tour(tour_id),
- CONSTRAINT fk_public_page_tour2 FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
+ PRIMARY KEY(id), UNIQUE KEY uq_public_page_tour(tour_id), CONSTRAINT fk_public_page_tour2 FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tour_public_sections (
@@ -327,19 +318,20 @@ CREATE TABLE IF NOT EXISTS ticket_templates (
 
 CREATE TABLE IF NOT EXISTS plans (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
- code VARCHAR(50) NOT NULL,
+ plan_key VARCHAR(50) NOT NULL,
  name VARCHAR(100) NOT NULL,
- monthly_price DECIMAL(12,2) NOT NULL DEFAULT 0,
- yearly_price DECIMAL(12,2) NOT NULL DEFAULT 0,
+ description VARCHAR(500) NULL,
+ price_monthly DECIMAL(12,2) NOT NULL DEFAULT 0,
+ price_yearly DECIMAL(12,2) NOT NULL DEFAULT 0,
  is_active TINYINT(1) NOT NULL DEFAULT 1,
- PRIMARY KEY(id), UNIQUE KEY uq_plan_code(code)
+ PRIMARY KEY(id), UNIQUE KEY uq_plan_key(plan_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS plan_features (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
  plan_id BIGINT UNSIGNED NOT NULL,
  feature_key VARCHAR(120) NOT NULL,
- feature_value VARCHAR(255) NULL,
+ feature_value LONGTEXT NULL,
  PRIMARY KEY(id), UNIQUE KEY uq_plan_feature(plan_id,feature_key),
  CONSTRAINT fk_plan_feature_plan FOREIGN KEY(plan_id) REFERENCES plans(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -348,35 +340,35 @@ CREATE TABLE IF NOT EXISTS subscriptions (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
  organization_id BIGINT UNSIGNED NOT NULL,
  plan_id BIGINT UNSIGNED NOT NULL,
- status ENUM('TRIAL','ACTIVE','PAST_DUE','CANCELLED','EXPIRED') NOT NULL DEFAULT 'TRIAL',
- billing_cycle ENUM('MONTHLY','YEARLY') NOT NULL DEFAULT 'MONTHLY',
- starts_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ status ENUM('TRIALING','ACTIVE','PAST_DUE','CANCELLED','EXPIRED') NOT NULL DEFAULT 'TRIALING',
+ starts_at DATETIME NOT NULL,
  ends_at DATETIME NULL,
- external_customer_id VARCHAR(190) NULL,
- external_subscription_id VARCHAR(190) NULL,
+ provider VARCHAR(80) NULL,
+ provider_customer_id VARCHAR(190) NULL,
+ provider_subscription_id VARCHAR(190) NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- PRIMARY KEY(id), KEY idx_subscription_org(organization_id),
+ PRIMARY KEY(id), KEY idx_subscription_org(organization_id,status),
  CONSTRAINT fk_subscription_org FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE CASCADE,
  CONSTRAINT fk_subscription_plan FOREIGN KEY(plan_id) REFERENCES plans(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS audit_log (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
- user_id BIGINT UNSIGNED NULL,
  organization_id BIGINT UNSIGNED NULL,
  tour_id BIGINT UNSIGNED NULL,
- action VARCHAR(100) NOT NULL,
+ user_id BIGINT UNSIGNED NULL,
+ action VARCHAR(120) NOT NULL,
  entity_type VARCHAR(80) NULL,
  entity_id BIGINT UNSIGNED NULL,
- details TEXT NULL,
- ip_address VARBINARY(16) NULL,
+ details LONGTEXT NULL,
+ ip_address VARCHAR(45) NULL,
  user_agent VARCHAR(500) NULL,
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY(id), KEY idx_audit_org_date(organization_id,created_at), KEY idx_audit_tour_date(tour_id,created_at), KEY idx_audit_user_date(user_id,created_at),
- CONSTRAINT fk_audit_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL,
+ PRIMARY KEY(id), KEY idx_audit_org_time(organization_id,created_at), KEY idx_audit_tour_time(tour_id,created_at), KEY idx_audit_user_time(user_id,created_at),
  CONSTRAINT fk_audit_org FOREIGN KEY(organization_id) REFERENCES organizations(id) ON DELETE SET NULL,
- CONSTRAINT fk_audit_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE SET NULL
+ CONSTRAINT fk_audit_tour FOREIGN KEY(tour_id) REFERENCES tours(id) ON DELETE SET NULL,
+ CONSTRAINT fk_audit_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS=1;
