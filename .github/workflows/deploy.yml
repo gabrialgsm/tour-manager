@@ -13,7 +13,7 @@ jobs:
     steps:
     # ১. গিটহাব থেকে লেটেস্ট কোড চেকআউট করা
     - name: Checkout Repository Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     # ২. আপনার কন্টাবো সার্ভারে ssh-action এর মাধ্যমে ফাইল সিঙ্ক করা
     - name: Deploy to Contabo via SSH/Rsync
