@@ -19,11 +19,11 @@ jobs:
     - name: Deploy to Contabo via SSH/Rsync
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.CONTABO_HOST }}
-        username: ${{ secrets.CONTABO_USERNAME }}
-        password: ${{ secrets.CONTABO_PASSWORD }}
+        host: ${{ secrets.SFTP_HOST }}
+        username: ${{ secrets.SFTP_USERNAME }}
+        password: ${{ secrets.SFTP_PASSWORD }}
         # আপনি যদি পাসওয়ার্ডের বদলে SSH Key ব্যবহার করেন, তবে নিচের লাইনটি আনকমেন্ট করুন
-        # key: ${{ secrets.CONTABO_SSH_KEY }}
+        # key: ${{ secrets.SFTP_SSH_KEY }}
         port: 22
         source: "."                     # আপনার রিপোজিটরির কোন ফাইলগুলো যাবে (এখানে সব ফাইল)
         target: "/home/rightslash-tour/htdocs/tour.rightslash.com/"     # কন্টাবো সার্ভারের যে ফোল্ডারে ফাইলগুলো রাখতে চান (Path)
