@@ -11,16 +11,18 @@ $q=$db->prepare("SELECT tp.id,tp.status,pp.full_name,pp.phone,t.name tour_name,t
 $q->execute([$passengerId,$tourId,saas_current_organization_id()]);
 $booking=$q->fetch();
 if(!$booking){http_response_code(404);exit('Passenger not found.');}
+if($booking['status']!=='ACTIVE'){http_response_code(403);exit('Booking access links can only be generated for ACTIVE passengers.');}
 $error='';$token='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
  try{
   saas_check_csrf();
   $token=bin2hex(random_bytes(32));
   $hash=hash('sha256',$token);
-  $q=$db->prepare('UPDATE tour_passengers SET booking_access_token_hash=?,booking_access_token_created_at=NOW(),booking_access_token_revoked_at=NULL WHERE id=? AND tour_id=?');
-  $q->execute([$hash,$passengerId,$tourId]);
+  $q=$db->prepare("UPDATE tour_passengers tp JOIN tours t ON t.id=tp.tour_id SET tp.booking_access_token_hash=?,tp.booking_access_token_created_at=NOW(),tp.booking_access_token_revoked_at=NULL WHERE tp.id=? AND tp.tour_id=? AND t.organization_id=? AND tp.status='ACTIVE'");
+  $q->execute([$hash,$passengerId,$tourId,saas_current_organization_id()]);
+  if($q->rowCount()!==1)throw new RuntimeException('Passenger is no longer active.');
   saas_audit('booking.access_link_generated','tour_passenger',$passengerId,json_encode(['revoked_previous'=>true],JSON_UNESCAPED_UNICODE));
- }catch(Throwable $e){$error='Could not generate the booking access link.';}
+ }catch(Throwable $e){$error=$e->getMessage()==='Passenger is no longer active.'?$e->getMessage():'Could not generate the booking access link.';}
 }
 if($token===''){
  $q=$db->prepare('SELECT booking_access_token_created_at FROM tour_passengers WHERE id=? AND tour_id=?');$q->execute([$passengerId,$tourId]);$created=$q->fetchColumn();
