@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__.'/bootstrap_saas.php';
 saas_require_login();
 $tourId=saas_require_tour();
-saas_require_permission('tour.update');
+saas_require_permission('tour.edit');
 $db=saas_db();
 $passengerId=(int)($_GET['passenger_id']??$_POST['passenger_id']??0);
 if($passengerId<=0){http_response_code(400);exit('Passenger is required.');}
