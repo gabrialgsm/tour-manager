@@ -1,0 +1,62 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/saas_ticket_service.php';
+saas_require_login();
+$tourId=saas_require_tour();
+saas_require_permission('payment.create');
+$db=saas_db();$error='';$ok='';
+
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    try{
+        saas_check_csrf();
+        $action=(string)($_POST['action']??'');
+        $intentId=(int)($_POST['intent_id']??0);
+        if($intentId<=0) throw new RuntimeException('Payment request not found.');
+        $db->beginTransaction();
+        $q=$db->prepare("SELECT pi.*,tp.status passenger_status,tp.fee,tp.discount FROM payment_intents pi JOIN tour_passengers tp ON tp.id=pi.tour_passenger_id WHERE pi.id=? AND pi.tour_id=? FOR UPDATE");
+        $q->execute([$intentId,$tourId]);$intent=$q->fetch();
+        if(!$intent) throw new RuntimeException('Payment request not found.');
+
+        if($action==='reject'){
+            if($intent['status']!=='PENDING') throw new RuntimeException('Only pending requests can be rejected.');
+            $q=$db->prepare("UPDATE payment_intents SET status='CANCELLED',updated_at=NOW() WHERE id=?");$q->execute([$intentId]);
+            $db->commit();
+            saas_audit('payment_intent.cancelled','payment_intent',$intentId,json_encode(['reference'=>$intent['reference']],JSON_UNESCAPED_UNICODE));
+            $ok='Payment request cancelled.';
+        }elseif($action==='confirm'){
+            if($intent['status']!=='PENDING') throw new RuntimeException('Only pending requests can be confirmed.');
+            if($intent['expires_at']!==null && strtotime((string)$intent['expires_at'])<time()){
+                $q=$db->prepare("UPDATE payment_intents SET status='EXPIRED',updated_at=NOW() WHERE id=?");$q->execute([$intentId]);
+                throw new RuntimeException('This payment request has expired.');
+            }
+            if($intent['passenger_status']!=='ACTIVE') throw new RuntimeException('Passenger is no longer active.');
+            $q=$db->prepare('SELECT COALESCE(SUM(amount),0) FROM payments WHERE tour_id=? AND tour_passenger_id=?');$q->execute([$tourId,(int)$intent['tour_passenger_id']]);
+            $paid=(float)$q->fetchColumn();
+            $gross=max(0,(float)$intent['fee']-(float)$intent['discount']);
+            $due=max(0,$gross-$paid);
+            $amount=round((float)$intent['amount'],2);
+            if($amount<=0||$amount>$due+0.005) throw new RuntimeException('This request exceeds the current outstanding balance.');
+
+            $metadata=[];if(!empty($intent['metadata_json'])){$decoded=json_decode((string)$intent['metadata_json'],true);if(is_array($decoded))$metadata=$decoded;}
+            $method=strtoupper((string)($metadata['method']??''));
+            if(!in_array($method,['BKASH','NAGAD','ROCKET','CARD','BANK'],true))$method='OTHER';
+            $q=$db->prepare('INSERT INTO payments(tour_id,tour_passenger_id,amount,payment_method,reference,payment_date,notes,created_by) VALUES(?,?,?,?,?,?,?,?)');
+            $q->execute([$tourId,(int)$intent['tour_passenger_id'],$amount,$method,$intent['reference']?:null,date('Y-m-d'),'Confirmed from payment request',saas_user_id()]);
+            $paymentId=(int)$db->lastInsertId();
+            $q=$db->prepare("UPDATE payment_intents SET status='SUCCEEDED',succeeded_at=NOW(),updated_at=NOW() WHERE id=?");$q->execute([$intentId]);
+
+            $newPaid=$paid+$amount;$newDue=max(0,$gross-$newPaid);$ticket=null;
+            if($newDue<=0.005){
+                $ticket=saas_issue_ticket($db,$tourId,(int)$intent['tour_passenger_id'],(int)$intent['organization_id']);
+            }
+            $db->commit();
+            saas_audit('payment.confirmed','payment',$paymentId,json_encode(['payment_intent_id'=>$intentId,'amount'=>$amount,'reference'=>$intent['reference']],JSON_UNESCAPED_UNICODE));
+            if($ticket)saas_audit('ticket.auto_issued','ticket_instance',(int)$ticket['id'],json_encode(['tour_passenger_id'=>(int)$intent['tour_passenger_id'],'payment_id'=>$paymentId],JSON_UNESCAPED_UNICODE));
+            $ok=$ticket?'Payment confirmed and ticket automatically issued.':'Payment confirmed and recorded successfully.';
+        }else throw new RuntimeException('Invalid action.');
+    }catch(Throwable $e){if($db->inTransaction())$db->rollBack();$error=$e->getMessage();}
+}
+
+$q=$db->prepare("SELECT pi.*,pp.full_name,pp.phone,tp.fee,tp.discount,COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.tour_id=pi.tour_id AND p.tour_passenger_id=pi.tour_passenger_id),0) paid FROM payment_intents pi JOIN tour_passengers tp ON tp.id=pi.tour_passenger_id JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id WHERE pi.tour_id=? ORDER BY pi.id DESC LIMIT 100");$q->execute([$tourId]);$intents=$q->fetchAll();
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Requests</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;color:#172033}.wrap{max-width:1250px;margin:25px auto;padding:0 16px}.box{background:#fff;border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 6px 22px #0000000b}.msg{padding:11px;border-radius:9px;margin-bottom:15px}.ok{background:#ecfdf3;color:#067647}.err{background:#fef3f2;color:#b42318}.muted{color:#667085;font-size:13px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;font-size:12px;font-weight:700}.actions{display:flex;gap:6px}.actions button{padding:7px 10px;border:1px solid #d0d5dd;border-radius:7px;background:#fff;cursor:pointer;font-weight:700}.actions .confirm{background:#155eef;color:#fff;border-color:#155eef}.actions .reject{color:#b42318;border-color:#fecdca}</style></head><body><main class="wrap"><p><a href="saas_dashboard.php">← Dashboard</a></p><h1>Payment Requests</h1><p class="muted">Confirm a customer payment only after the money has actually been received. A fully paid booking automatically receives a QR ticket.</p><?php if($ok):?><div class="msg ok"><?=saas_h($ok)?></div><?php endif;?><?php if($error):?><div class="msg err"><?=saas_h($error)?></div><?php endif;?><section class="box"><div class="tablewrap"><table><tr><th>Reference</th><th>Passenger</th><th>Amount</th><th>Method</th><th>Current Due</th><th>Status</th><th>Expires</th><th>Action</th></tr><?php foreach($intents as $i):$due=max(0,(float)$i['fee']-(float)$i['discount']-(float)$i['paid']);$meta=json_decode((string)($i['metadata_json']??''),true);$method=is_array($meta)?($meta['method']??'—'):'—';?><tr><td><?=saas_h($i['reference']??'')?></td><td><?=saas_h($i['full_name'])?><div class="muted"><?=saas_h($i['phone']??'')?></div></td><td><?=saas_h($i['currency'])?> <?=number_format((float)$i['amount'],2)?></td><td><?=saas_h($method)?></td><td><?=saas_h($i['currency'])?> <?=number_format($due,2)?></td><td><span class="badge"><?=saas_h($i['status'])?></span></td><td><?=saas_h($i['expires_at']??'')?></td><td><?php if($i['status']==='PENDING'):?><div class="actions"><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="intent_id" value="<?=$i['id']?>"><button class="confirm" name="action" value="confirm">Confirm received</button></form><form method="post" onsubmit="return confirm('Cancel this payment request?')"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="intent_id" value="<?=$i['id']?>"><button class="reject" name="action" value="reject">Reject</button></form></div><?php else:?>—<?php endif;?></td></tr><?php endforeach;?></table><?php if(!$intents):?><p class="muted">No payment requests yet.</p><?php endif;?></div></section></main></body></html>
