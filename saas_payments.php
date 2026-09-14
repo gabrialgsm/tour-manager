@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/saas_ticket_service.php';
 saas_require_login();
 $tourId=saas_require_tour();
 saas_require_permission('payment.create');
@@ -15,11 +16,16 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
    $allowed=['CASH','BKASH','NAGAD','ROCKET','BANK','CARD','OTHER'];if(!in_array($method,$allowed,true))throw new RuntimeException('Invalid payment method.');
    if(!preg_match('/^\d{4}-\d{2}-\d{2}$/',$date))throw new RuntimeException('Invalid payment date.');
    $db->beginTransaction();
-   $q=$db->prepare("SELECT tp.id,pp.full_name,tp.fee,tp.discount FROM tour_passengers tp JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id WHERE tp.id=? AND tp.tour_id=? AND tp.status<>'CANCELLED' FOR UPDATE");$q->execute([$tpId,$tourId]);$p=$q->fetch();if(!$p)throw new RuntimeException('Passenger does not belong to this tour.');
+   $q=$db->prepare("SELECT tp.id,tp.status,tp.fee,tp.discount,pp.full_name FROM tour_passengers tp JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id JOIN tours t ON t.id=tp.tour_id WHERE tp.id=? AND tp.tour_id=? AND t.organization_id=? AND tp.status<>'CANCELLED' FOR UPDATE");$q->execute([$tpId,$tourId,(int)saas_current_organization()['id']]);$p=$q->fetch();if(!$p)throw new RuntimeException('Passenger does not belong to this tour.');
    $q=$db->prepare('SELECT COALESCE(SUM(amount),0) FROM payments WHERE tour_passenger_id=? AND tour_id=?');$q->execute([$tpId,$tourId]);$paid=(float)$q->fetchColumn();$gross=max(0,(float)$p['fee']-(float)$p['discount']);$due=max(0,$gross-$paid);
    if($amount>$due+0.005)throw new RuntimeException('Payment exceeds the current due amount of '.number_format($due,2).'.');
-   $q=$db->prepare('INSERT INTO payments(tour_id,tour_passenger_id,amount,payment_method,reference,payment_date,notes,created_by) VALUES(?,?,?,?,?,?,?,?)');$q->execute([$tourId,$tpId,$amount,$method,$ref?:null,$date,$notes?:null,saas_user_id()]);$id=(int)$db->lastInsertId();$db->commit();
-   saas_audit('payment.created','payment',$id,json_encode(['tour_passenger_id'=>$tpId,'amount'=>$amount,'method'=>$method],JSON_UNESCAPED_UNICODE));$ok='Payment recorded for '.$p['full_name'].'.';
+   $q=$db->prepare('INSERT INTO payments(tour_id,tour_passenger_id,amount,payment_method,reference,payment_date,notes,created_by) VALUES(?,?,?,?,?,?,?,?)');$q->execute([$tourId,$tpId,$amount,$method,$ref?:null,$date,$notes?:null,saas_user_id()]);$id=(int)$db->lastInsertId();
+   $newDue=max(0,$gross-($paid+$amount));$ticket=null;
+   if($newDue<=0.005){$ticket=saas_issue_ticket($db,$tourId,$tpId,(int)saas_current_organization()['id']);}
+   $db->commit();
+   saas_audit('payment.created','payment',$id,json_encode(['tour_passenger_id'=>$tpId,'amount'=>$amount,'method'=>$method],JSON_UNESCAPED_UNICODE));
+   if($ticket)saas_audit('ticket.auto_issued','ticket_instance',(int)$ticket['id'],json_encode(['tour_passenger_id'=>$tpId,'payment_id'=>$id],JSON_UNESCAPED_UNICODE));
+   $ok=$ticket?'Payment recorded and ticket automatically issued for '.$p['full_name'].'.':'Payment recorded for '.$p['full_name'].'.';
   }elseif($action==='delete_payment'){
    saas_require_permission('payment.delete');
    $id=(int)($_POST['payment_id']??0);$db->beginTransaction();$q=$db->prepare('SELECT id,amount,tour_passenger_id FROM payments WHERE id=? AND tour_id=? FOR UPDATE');$q->execute([$id,$tourId]);$pay=$q->fetch();if(!$pay)throw new RuntimeException('Payment not found.');$q=$db->prepare('DELETE FROM payments WHERE id=? AND tour_id=?');$q->execute([$id,$tourId]);$db->commit();saas_audit('payment.deleted','payment',$id,json_encode(['amount'=>$pay['amount'],'tour_passenger_id'=>$pay['tour_passenger_id']]));$ok='Payment deleted.';
