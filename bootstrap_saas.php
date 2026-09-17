@@ -4,13 +4,26 @@ declare(strict_types=1);
 $config = require __DIR__ . '/config.php';
 date_default_timezone_set($config['app']['timezone'] ?? 'Asia/Dhaka');
 
+$isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+$appEnv = strtolower((string)($config['app']['environment'] ?? 'development'));
+ini_set('session.use_strict_mode','1');
+ini_set('session.use_only_cookies','1');
 session_name('TOURMANAGERSESSID');
 session_set_cookie_params([
     'httponly' => true,
-    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+    'secure' => $isHttps,
     'samesite' => 'Lax',
 ]);
 session_start();
+
+// Baseline browser hardening for every SaaS request.
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+if ($isHttps && $appEnv === 'production') {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
 
 function saas_db(): PDO
 {
