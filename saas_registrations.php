@@ -18,7 +18,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
    if($p['status']==='CANCELLED')throw new RuntimeException('Registration is already cancelled.');
    $q=$db->prepare("UPDATE tour_passengers SET status='CANCELLED',booking_access_token_revoked_at=NOW() WHERE id=? AND tour_id=? AND status<>'CANCELLED'");$q->execute([$id,$tourId]);if(!$q->rowCount())throw new RuntimeException('Registration could not be cancelled.');
    $q=$db->prepare("SELECT id FROM ticket_instances WHERE tour_passenger_id=? AND tour_id=? AND status='ISSUED' AND voided_at IS NULL ORDER BY id DESC LIMIT 1 FOR UPDATE");$q->execute([$id,$tourId]);$ticket=$q->fetch();if($ticket){$q=$db->prepare("UPDATE ticket_instances SET qr_token_revoked_at=NOW(),status='VOID',voided_at=NOW(),updated_at=NOW() WHERE id=?");$q->execute([(int)$ticket['id']]);}
-   $ok='Registration cancelled.';$audit=['registration.cancelled',['name'=>$p['full_name'],'ticket_voided'=>(bool)$ticket]];
+   $q=$db->prepare('DELETE FROM passenger_seat_assignments WHERE tour_passenger_id=?');$q->execute([$id]);
+   $q=$db->prepare('DELETE FROM room_assignments WHERE tour_passenger_id=?');$q->execute([$id]);
+   $ok='Registration cancelled.';$audit=['registration.cancelled',['name'=>$p['full_name'],'ticket_voided'=>(bool)$ticket,'seat_room_released'=>true]];
   } else throw new RuntimeException('Invalid action.');
   $db->commit();saas_audit($audit[0],'tour_passenger',$id,json_encode($audit[1],JSON_UNESCAPED_UNICODE));
  }catch(Throwable $e){if($db->inTransaction())$db->rollBack();$error=$e->getMessage();}
