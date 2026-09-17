@@ -23,7 +23,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 $q=$db->prepare('SELECT COALESCE(SUM(amount),0) FROM incomes WHERE tour_id=?');$q->execute([$tourId]);$incomeTotal=(float)$q->fetchColumn();
 $q=$db->prepare('SELECT COALESCE(SUM(amount),0) FROM payments WHERE tour_id=?');$q->execute([$tourId]);$paymentTotal=(float)$q->fetchColumn();
 $q=$db->prepare('SELECT COALESCE(SUM(amount),0) FROM expenses WHERE tour_id=?');$q->execute([$tourId]);$expenseTotal=(float)$q->fetchColumn();
-$q=$db->prepare('SELECT COALESCE(SUM(fee-discount),0) FROM tour_passengers WHERE tour_id=? AND status<>'CANCELLED'');$q->execute([$tourId]);$receivable=(float)$q->fetchColumn();
+$q=$db->prepare("SELECT COALESCE(SUM(fee-discount),0) FROM tour_passengers WHERE tour_id=? AND status<>'CANCELLED'");$q->execute([$tourId]);$receivable=(float)$q->fetchColumn();
 $q=$db->prepare('SELECT e.*,u.name creator FROM expenses e LEFT JOIN users u ON u.id=e.created_by WHERE e.tour_id=? ORDER BY e.expense_date DESC,e.id DESC');$q->execute([$tourId]);$expenses=$q->fetchAll();
 $q=$db->prepare('SELECT i.*,u.name creator FROM incomes i LEFT JOIN users u ON u.id=i.created_by WHERE i.tour_id=? ORDER BY i.income_date DESC,i.id DESC');$q->execute([$tourId]);$incomes=$q->fetchAll();
 $collected=$paymentTotal+$incomeTotal;$balance=$collected-$expenseTotal;$due=max(0,$receivable-$paymentTotal);

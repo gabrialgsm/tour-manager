@@ -1,0 +1,36 @@
+name: Automated Tests
+
+on:
+  push:
+    branches:
+      - saas-rebuild
+      - main
+  pull_request:
+    branches:
+      - saas-rebuild
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  php-tests:
+    name: PHP 8.3 tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql
+          coverage: none
+
+      - name: Show PHP version
+        run: php -v
+
+      - name: Run automated regression suite
+        run: php tests/run.php

@@ -10,7 +10,7 @@ if(!$bus){http_response_code(404);exit('Bus not found.');}
 $q=$db->prepare("SELECT s.*,pa.tour_passenger_id,tp.status AS passenger_status,pp.full_name,pp.phone FROM seats s LEFT JOIN passenger_seat_assignments pa ON pa.seat_id=s.id AND pa.bus_id=s.bus_id LEFT JOIN tour_passengers tp ON tp.id=pa.tour_passenger_id AND tp.tour_id=? LEFT JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id WHERE s.bus_id=? ORDER BY s.row_no,s.id");$q->execute([$tourId,$busId]);$seats=$q->fetchAll();
 $q=$db->prepare("SELECT tp.id,pp.full_name,pp.phone,pa.seat_id FROM tour_passengers tp JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id LEFT JOIN passenger_seat_assignments pa ON pa.tour_passenger_id=tp.id WHERE tp.tour_id=? AND tp.status<>'CANCELLED' ORDER BY pp.full_name");$q->execute([$tourId]);$passengers=$q->fetchAll();
 $q=$db->prepare('SELECT id,name,layout_type,total_seats FROM buses WHERE tour_id=? ORDER BY id');$q->execute([$tourId]);$buses=$q->fetchAll();
-$bySeat=[];foreach($seats as $s)$bySeat[(int)$s['id']=$s;
+$bySeat=[];foreach($seats as $s)$bySeat[(int)$s['id']]=$s;
 $rows=[];foreach($seats as $s)$rows[(int)$s['row_no']][]=$s;
 function row_label($n){if($n<=0)return 'Front';$out='';while($n>0){$n--; $out=chr(65+$n%26).$out;$n=intdiv($n,26);}return $out;}
 function seat_html($s){$occupied=!empty($s['tour_passenger_id']);$title=$occupied?($s['full_name'].' · '.$s['phone']):'Available';$cls=$occupied?'seat occupied':'seat available';return '<button type="button" class="'.$cls.'" data-seat="'.(int)$s['id'].'" data-code="'.saas_h($s['seat_code']).'" title="'.saas_h($title).'">'.saas_h($s['seat_code']).'<small>'.($occupied?saas_h(mb_substr($s['full_name'],0,12)):'Available').'</small></button>';}

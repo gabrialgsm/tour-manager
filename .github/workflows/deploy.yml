@@ -1,30 +1,114 @@
-name: Auto Sync to Contabo Server
+name: Production Deploy
 
-# main ব্রাঞ্চে কোড পুশ (Push) হলেই এই অ্যাকশনটি চালু হবে
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Automated Tests
+    types:
+      - completed
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    name: Deploy to production
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      DEPLOY_PATH: /home/rightslash-tour/htdocs/tour.rightslash.com
 
     steps:
-    # ১. গিটহাব থেকে লেটেস্ট কোড চেকআউট করা
-    - name: Checkout Repository Code
-      uses: actions/checkout@v5
+      - name: Checkout tested commit
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-    # ২. আপনার কন্টাবো সার্ভারে ssh-action এর মাধ্যমে ফাইল সিঙ্ক করা
-    - name: Deploy to Contabo via SSH/Rsync
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SFTP_HOST }}
-        username: ${{ secrets.SFTP_USERNAME }}
-        password: ${{ secrets.SFTP_PASSWORD }}
-        # আপনি যদি পাসওয়ার্ডের বদলে SSH Key ব্যবহার করেন, তবে নিচের লাইনটি আনকমেন্ট করুন
-        # key: ${{ secrets.SFTP_SSH_KEY }}
-        port: 22
-        source: "."                     # আপনার রিপোজিটরির কোন ফাইলগুলো যাবে (এখানে সব ফাইল)
-        target: "/home/rightslash-tour/htdocs/tour.rightslash.com/"     # কন্টাবো সার্ভারের যে ফোল্ডারে ফাইলগুলো রাখতে চান (Path)
-        strip_components: 0
+      - name: Checkout main
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate deployment configuration
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_SSH_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Verify SSH access
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" 'printf "SSH OK\n"'
+
+      - name: Sync application files
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='config.php' \
+            --exclude='storage/' \
+            --exclude='vendor/' \
+            -e 'ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes' \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+
+      - name: Run database migrations
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd '$DEPLOY_PATH' && php bin/migrate.php"
+
+      - name: Production smoke check
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd '$DEPLOY_PATH' && php -r 'require \"bootstrap_saas.php\"; echo \"Application bootstrap OK\\n\";'"
+
+      - name: Cleanup SSH credentials
+        if: always()
+        run: rm -f ~/.ssh/deploy_key ~/.ssh/known_hosts
