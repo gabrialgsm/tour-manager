@@ -11,6 +11,9 @@ const PASSENGER_RESET_EMAIL_LIMIT = 5;
 const PASSENGER_RESET_BLOCK = 900;
 const PASSENGER_OAUTH_IP_LIMIT = 20;
 const PASSENGER_OAUTH_BLOCK = 900;
+const ADMIN_AUTH_IP_LIMIT = 20;
+const ADMIN_AUTH_IDENTITY_LIMIT = 8;
+const ADMIN_AUTH_BLOCK = 900;
 
 function passenger_auth_rate_key(string $kind,string $value): string {
     return hash_hmac('sha256',strtoupper($kind).'|'.strtolower(trim($value)),saas_app_key());
@@ -36,7 +39,6 @@ function passenger_auth_rate_record(string $kind,string $value,int $limit,int $b
     $db=saas_db();$now=date('Y-m-d H:i:s');$key=passenger_auth_rate_key($kind,$value);
     $db->beginTransaction();
     try{
-        // Create the row first so concurrent requests can lock the same record.
         $db->prepare('INSERT IGNORE INTO passenger_auth_rate_limits(rate_key,attempts,window_started_at,last_attempt_at) VALUES(?,0,?,?)')->execute([$key,$now,$now]);
         $q=$db->prepare('SELECT attempts,window_started_at,blocked_until FROM passenger_auth_rate_limits WHERE rate_key=? FOR UPDATE');
         $q->execute([$key]);$r=$q->fetch();
@@ -81,6 +83,16 @@ function passenger_oauth_rate_fail(): void {
 function passenger_oauth_rate_success(): void {
     $value=passenger_auth_client_ip();
     if($value!=='')saas_db()->prepare('DELETE FROM passenger_auth_rate_limits WHERE rate_key=?')->execute([passenger_auth_rate_key('OAUTH_IP',$value)]);
+}
+function admin_auth_rate_limited(string $identity): bool {
+    return passenger_auth_rate_blocked('ADMIN_IP',passenger_auth_client_ip(),ADMIN_AUTH_IP_LIMIT)||passenger_auth_rate_blocked('ADMIN_IDENTITY',$identity,ADMIN_AUTH_IDENTITY_LIMIT);
+}
+function admin_auth_rate_fail(string $identity): void {
+    passenger_auth_rate_record('ADMIN_IP',passenger_auth_client_ip(),ADMIN_AUTH_IP_LIMIT,ADMIN_AUTH_BLOCK);
+    passenger_auth_rate_record('ADMIN_IDENTITY',$identity,ADMIN_AUTH_IDENTITY_LIMIT,ADMIN_AUTH_BLOCK);
+}
+function admin_auth_rate_success(string $identity): void {
+    $db=saas_db();foreach([['ADMIN_IP',passenger_auth_client_ip()],['ADMIN_IDENTITY',$identity]] as [$kind,$value]){if($value==='')continue;$db->prepare('DELETE FROM passenger_auth_rate_limits WHERE rate_key=?')->execute([passenger_auth_rate_key($kind,$value)]);}
 }
 function passenger_auth_rate_cleanup(): void {
     if(random_int(1,100)===1)saas_db()->exec("DELETE FROM passenger_auth_rate_limits WHERE updated_at<DATE_SUB(NOW(),INTERVAL 2 DAY)");
