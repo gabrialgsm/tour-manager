@@ -1,83 +1,34 @@
 # GMJS Tour Manager — FINAL RELEASE
 
-Production-oriented PHP + MySQL tour management system. Includes booking, payments, rooms, expenses, reports, printing, public seat plan, multiple contacts, check-in, audit logging, and UTF8MB4 support.
+Production-oriented PHP + MySQL tour management system.
 
-GMJS Tour Manager V3.2 — UI/UX refresh
+## Backup & Disaster Recovery
 
-Brand palette: lively green + white. Enhanced dashboard, seat states, cards, forms, mobile spacing, hover/focus states and print-friendly visuals.
+Production backups are created by `bin/backup.sh`. The scheduled workflow `.github/workflows/backup.yml` runs daily at 18:30 UTC (00:30 Bangladesh time) and can also be started manually.
 
-# GMJS Tour Manager — PHP + MySQL
+Each backup set contains:
+- `database.sql.gz` — MySQL dump with routines, triggers and events
+- `application.tar.gz` — application plus persistent storage, excluding transient cache/tmp and PHP error logs
+- `SHA256SUMS` — integrity checks
+- `BACKUP_ID` — backup timestamp
 
-## Included
-- Secure admin login
-- Multiple tours: create, edit, archive/delete empty tours, switch current tour
-- Multiple buses per tour: create, edit, activate/deactivate, delete empty buses
-- Configurable seat count; generated 5-seat rows (A1-A5, B1-B5...)
-- Seat booking with passenger information
-- Individual/custom fee and financial assistance discount
-- Multiple payments and payment summary
-- AC Couple / Non-AC Couple / AC 4 Bed / Non-AC 4 Bed
-- Room creation and passenger assignment
-- Expense tracking
-- Passenger edit/delete (delete means CANCELLED and releases seat)
-- Seat map shows booked passenger name
-- Payment-due color
-- Individual ticket print
-- Multi-select ticket print
-- Passenger list print
-- Tour financial/booking summary print
-- Mobile responsive UI
+Backups are written outside the application directory by default to `../backups/tour-manager` with restrictive permissions and 14-day local retention.
 
-## Install
-1. Create a MySQL database/user in Contabo/CloudPanel.
-2. Import `db.sql`.
-3. Copy `config.example.php` to `config.php` and set DB credentials.
-4. Upload the whole folder to your PHP site's document root.
-5. Open `/setup_admin.php` once and create the first admin.
-6. Delete `setup_admin.php`.
-7. Open `/login.php`.
+### Recovery
+1. Stop or isolate public traffic.
+2. Select a known-good backup directory.
+3. Verify `SHA256SUMS`.
+4. Run `CONFIRM_RESTORE=YES bin/restore.sh /absolute/path/to/backup/TIMESTAMP`.
+5. Verify `config.php` and runtime secrets were preserved.
+6. Run migrations/smoke tests and verify critical tour, passenger, payment and ticket data.
+7. Re-enable traffic only after checks pass.
 
-PHP 8.1+ and MySQL 8/MariaDB are recommended.
+The restore script requires explicit `CONFIRM_RESTORE=YES` because database restore is destructive and deliberately does not restore `config.php`.
 
-## Important
-- Do not expose `setup_admin.php` after first admin creation.
-- Use HTTPS.
-- Back up the MySQL database regularly.
+### DR policy
+
+A local backup alone is not sufficient if the production VPS is lost. Copy backup sets to an independent off-server/object-storage location and periodically test restoration on a separate environment. Recommended baseline: daily backups, 14+ days retention, independent copy, and quarterly restore drills.
 
 ## CI/CD
 
-The `saas-rebuild` branch runs the automated regression suite through GitHub Actions. Production deployment is gated behind a successful `Automated Tests` run on `main`.
-
-The production workflow is `.github/workflows/deploy.yml`. It:
-
-1. Deploys the exact commit that passed the test workflow.
-2. Uses SSH with a deployment key and pinned `known_hosts`.
-3. Syncs application files with `rsync` while preserving server-side `config.php` and `storage/`.
-4. Runs `php bin/migrate.php` on the server.
-5. Runs a production bootstrap smoke check.
-6. Serializes deployments with a GitHub Actions concurrency lock.
-
-Create a GitHub environment named `production` and add these secrets:
-
-- `DEPLOY_HOST` — production server hostname/IP
-- `DEPLOY_USER` — SSH deployment user
-- `DEPLOY_PATH` — absolute application directory on the server
-- `DEPLOY_SSH_KEY` — private SSH key used only for deployment
-- `DEPLOY_KNOWN_HOSTS` — pinned SSH host key line(s) for the production server
-
-Keep `config.php`, database credentials, `APP_KEY`, OAuth secrets, payment secrets, and other runtime secrets on the server/environment; they must not be committed to Git.
-
-### Production deployment flow
-
-`push/PR → Automated Tests → merge to main → Automated Tests on main → Production Deploy → migrations → smoke check`
-
-A manual `workflow_dispatch` is also available for an intentional production deployment from `main`.
-
-## Public Passenger Seat Plan
-Open `seat_plan.php` publicly. Passengers can select an active tour and bus and see available/booked seats. No login and no booking action are exposed. Booked passenger names/details are intentionally hidden for privacy. Configure the public contact phone/WhatsApp/message from Admin → Settings.
-
-### V2 → Public Seat Plan migration
-If V2 is already installed, import `db_upgrade_from_v2_public_seat_plan.sql` once before using the public seat plan. Then enter contact phone/WhatsApp in Settings.
-
-## V3.1 Multiple Public Contacts
-Admin Settings now supports unlimited contact rows per tour. Each row can have a label, phone, and WhatsApp number. The public seat plan displays every active contact with Call/WhatsApp buttons. Existing V3 contact fields are migrated automatically by `db_upgrade_from_v3_multiple_contacts.sql`.
+The `saas-rebuild` branch runs automated regression tests through GitHub Actions. Production deployment is gated behind successful tests on `main` and uses SSH with pinned `known_hosts`.
