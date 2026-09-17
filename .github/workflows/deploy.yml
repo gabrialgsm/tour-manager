@@ -27,6 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    env:
+      DEPLOY_PATH: /home/rightslash-tour/htdocs/tour.rightslash.com
+
     steps:
       - name: Checkout tested commit
         if: github.event_name == 'workflow_run'
@@ -44,14 +47,12 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           test -n "$DEPLOY_HOST"
           test -n "$DEPLOY_USER"
-          test -n "$DEPLOY_PATH"
           test -n "$DEPLOY_SSH_KEY"
           test -n "$DEPLOY_KNOWN_HOSTS"
 
@@ -73,13 +74,12 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" 'printf "SSH OK\\n"'
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" 'printf "SSH OK\n"'
 
       - name: Sync application files
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           rsync -az --delete \
@@ -95,7 +95,6 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
@@ -105,11 +104,10 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && php -r 'require "'"'bootstrap_saas.php'"'"'; echo "Application bootstrap OK";'"
+            "cd '$DEPLOY_PATH' && php -r 'require \"bootstrap_saas.php\"; echo \"Application bootstrap OK\\n\";'"
 
       - name: Cleanup SSH credentials
         if: always()
