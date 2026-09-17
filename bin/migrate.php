@@ -8,7 +8,6 @@ require __DIR__.'/../bootstrap_saas.php';
 $db=saas_db();
 $dir=realpath(__DIR__.'/../database/migrations');
 if($dir===false)throw new RuntimeException('Migration directory not found.');
-
 $files=glob($dir.'/*.sql')?:[];
 natcasesort($files);
 
@@ -17,37 +16,50 @@ $db->exec("CREATE TABLE IF NOT EXISTS schema_migrations (id BIGINT UNSIGNED NOT 
 $applied=[];
 foreach($db->query('SELECT version,checksum FROM schema_migrations ORDER BY id') as $row){$applied[(string)$row['version']]=(string)$row['checksum'];}
 
-$pending=[];
-foreach($files as $file){
-    $version=basename($file,'.sql');
-    $checksum=hash_file('sha256',$file);
-    if(isset($applied[$version])){
-        if(!hash_equals($applied[$version],$checksum))throw new RuntimeException("Migration checksum mismatch: {$version}");
-        continue;
+$baselineVersion=null;
+foreach($argv as $arg){if(str_starts_with($arg,'--baseline-until='))$baselineVersion=substr($arg,17);}
+if($baselineVersion!==null&&$baselineVersion==='')throw new RuntimeException('Invalid --baseline-until value.');
+if($baselineVersion!==null){
+    $found=false;
+    foreach($files as $file){
+        $version=basename($file,'.sql');
+        $checksum=hash_file('sha256',$file);
+        if($version===$baselineVersion)$found=true;
+        if(isset($applied[$version])){
+            if(!hash_equals($applied[$version],$checksum))throw new RuntimeException("Migration checksum mismatch: {$version}");
+            continue;
+        }
+        if($found&&$version!==$baselineVersion)continue;
+        $q=$db->prepare('INSERT INTO schema_migrations(version,checksum,execution_ms) VALUES(?,?,NULL)');
+        $q->execute([$version,$checksum]);
+        $applied[$version]=$checksum;
+        echo "Baselined {$version}.\n";
+        if($version===$baselineVersion)break;
     }
-    $pending[]=['version'=>$version,'checksum'=>$checksum,'file'=>$file];
+    if(!$found)throw new RuntimeException("Baseline migration not found: {$baselineVersion}");
+    echo "Baseline completed through {$baselineVersion}. Run without --baseline-until for pending migrations.\n";
+    exit(0);
 }
 
+$pending=[];
+foreach($files as $file){
+    $version=basename($file,'.sql');$checksum=hash_file('sha256',$file);
+    if(isset($applied[$version])){if(!hash_equals($applied[$version],$checksum))throw new RuntimeException("Migration checksum mismatch: {$version}");continue;}
+    $pending[]=['version'=>$version,'checksum'=>$checksum,'file'=>$file];
+}
 if(!$pending){echo "No pending migrations.\n";exit(0);}
 
 echo 'Pending migrations: '.count($pending)."\n";
 foreach($pending as $migration){
     $sql=(string)file_get_contents($migration['file']);
     if(trim($sql)==='')continue;
-    $started=microtime(true);
-    echo "Applying {$migration['version']}...\n";
+    $started=microtime(true);echo "Applying {$migration['version']}...\n";
     try{
-        $db->beginTransaction();
         $db->exec($sql);
         $ms=(int)round((microtime(true)-$started)*1000);
         $q=$db->prepare('INSERT INTO schema_migrations(version,checksum,execution_ms) VALUES(?,?,?)');
         $q->execute([$migration['version'],$migration['checksum'],$ms]);
-        $db->commit();
         echo "Applied {$migration['version']} ({$ms} ms).\n";
-    }catch(Throwable $e){
-        if($db->inTransaction())$db->rollBack();
-        throw new RuntimeException("Migration failed: {$migration['version']}: ".$e->getMessage(),0,$e);
-    }
+    }catch(Throwable $e){throw new RuntimeException("Migration failed: {$migration['version']}: ".$e->getMessage(),0,$e);}
 }
-
 echo "Migration run completed.\n";
