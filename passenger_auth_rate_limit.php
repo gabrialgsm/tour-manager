@@ -34,13 +34,26 @@ function passenger_auth_rate_limited(string $email): bool {
 function passenger_auth_rate_record(string $kind,string $value,int $limit,int $blockSeconds): void {
     if($value==='')return;
     $db=saas_db();$now=date('Y-m-d H:i:s');$key=passenger_auth_rate_key($kind,$value);
-    $q=$db->prepare('SELECT attempts,window_started_at FROM passenger_auth_rate_limits WHERE rate_key=? LIMIT 1');$q->execute([$key]);$r=$q->fetch();
-    $attempts=0;$window=$now;
-    if($r){$started=strtotime((string)$r['window_started_at']);if($started>0&&$started+PASSENGER_AUTH_RATE_WINDOW>$now){$attempts=(int)$r['attempts'];$window=(string)$r['window_started_at'];}}
-    $attempts++;
-    $blocked=$attempts>=$limit?date('Y-m-d H:i:s',time()+$blockSeconds):null;
-    $sql="INSERT INTO passenger_auth_rate_limits(rate_key,attempts,window_started_at,blocked_until,last_attempt_at) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE attempts=VALUES(attempts),window_started_at=VALUES(window_started_at),blocked_until=VALUES(blocked_until),last_attempt_at=VALUES(last_attempt_at)";
-    $db->prepare($sql)->execute([$key,$attempts,$window,$blocked,$now]);
+    $db->beginTransaction();
+    try{
+        // Create the row first so concurrent requests can lock the same record.
+        $db->prepare('INSERT IGNORE INTO passenger_auth_rate_limits(rate_key,attempts,window_started_at,last_attempt_at) VALUES(?,0,?,?)')->execute([$key,$now,$now]);
+        $q=$db->prepare('SELECT attempts,window_started_at,blocked_until FROM passenger_auth_rate_limits WHERE rate_key=? FOR UPDATE');
+        $q->execute([$key]);$r=$q->fetch();
+        if(!$r)throw new RuntimeException('Rate-limit state unavailable.');
+        $started=strtotime((string)$r['window_started_at']);
+        $inWindow=$started>0&&$started+PASSENGER_AUTH_RATE_WINDOW>$now;
+        $attempts=$inWindow?(int)$r['attempts']:0;
+        $window=$inWindow?(string)$r['window_started_at']:$now;
+        $attempts++;
+        $blocked=$attempts>=$limit?date('Y-m-d H:i:s',time()+$blockSeconds):null;
+        $u=$db->prepare('UPDATE passenger_auth_rate_limits SET attempts=?,window_started_at=?,blocked_until=?,last_attempt_at=?,updated_at=NOW() WHERE rate_key=?');
+        $u->execute([$attempts,$window,$blocked,$now,$key]);
+        $db->commit();
+    }catch(Throwable $e){
+        if($db->inTransaction())$db->rollBack();
+        throw $e;
+    }
 }
 function passenger_auth_rate_fail(string $email): void {
     passenger_auth_rate_record('IP',passenger_auth_client_ip(),PASSENGER_AUTH_IP_LIMIT,PASSENGER_AUTH_BLOCK);
