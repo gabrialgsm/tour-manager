@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         if (!$valid) { admin_auth_rate_fail($identity); throw new RuntimeException('Invalid username/email or password.'); }
         admin_auth_rate_success($identity);
         session_regenerate_id(true);
-        passenger_clear_session();
+        unset($_SESSION['passenger_account_id'],$_SESSION['passenger_profile_id'],$_SESSION['passenger_organization_id'],$_SESSION['passenger_session_id']);
         $_SESSION['user_id']=(int)$u['id'];
         $_SESSION['organization_id']=0;
         $_SESSION['tour_id']=0;
