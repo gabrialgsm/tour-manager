@@ -10,6 +10,7 @@ declare(strict_types=1);
  * syntax/security regression gate.
  */
 
+ob_start();
 $root = dirname(__DIR__);
 $failures = [];
 $passed = 0;
@@ -127,16 +128,16 @@ foreach ($permissionContracts as $file => $permission) {
 $securityContracts = [
     'saas_booking_link.php' => ["hash('sha256'", 'random_bytes(32)', 'booking_access_token_hash'],
     'passenger_auth.php' => ['password_verify(', 'passenger_auth_rate_limited('],
-    'passenger_google_auth.php' => ['random_bytes(32)', 'passenger_auth_rate_limited('],
-    'passenger_facebook_auth.php' => ['random_bytes(32)', 'passenger_auth_rate_limited('],
-    'passenger_password_reset.php' => ['random_bytes(32)', 'password_hash(', 'passenger_auth_rate_limited('],
+    'passenger_google_auth.php' => ['random_bytes(32)', 'passenger_oauth_rate_limited(', 'hash_equals('],
+    'passenger_facebook_auth.php' => ['random_bytes(32)', 'passenger_oauth_rate_limited(', 'hash_equals('],
+    'passenger_password_reset.php' => ['random_bytes(32)', 'password_hash(', 'passenger_reset_rate_limited('],
     'public_seat_select.php' => ['FOR UPDATE', 'beginTransaction', 'commit'],
     'public_room_select.php' => ['FOR UPDATE', 'beginTransaction', 'commit'],
     'public_features.php' => ['FOR UPDATE', 'unit_price', 'total_price'],
     'public_checkout.php' => ['payment_intents', 'FOR UPDATE', 'feature_total'],
     'saas_payment_intents.php' => ['FOR UPDATE', 'SUCCEEDED', 'saas_issue_ticket('],
     'saas_ticket_service.php' => ['hash_hmac', 'qr_token_hash', 'forceReissue'],
-    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "status='ISSUED'"],
+    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "status==='ISSUED'", 'voided_at'],
 ];
 foreach ($securityContracts as $file => $needles) {
     $text = file_text($file);
@@ -176,7 +177,7 @@ test_assert(
 // Ticket verification must reject revoked/voided tickets.
 $verifyText = file_text('ticket_verify.php');
 test_assert(
-    $verifyText !== '' && str_contains($verifyText, "status='ISSUED'") && str_contains($verifyText, 'voided_at'),
+    $verifyText !== '' && str_contains($verifyText, "status==='ISSUED'") && str_contains($verifyText, 'voided_at'),
     'Ticket verification checks issued/non-voided status'
 );
 
@@ -196,9 +197,6 @@ test_assert(in_array('013_migration_tracking', $versions, true), 'Migration trac
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
-// -------------------------------------------------------------------------
-// Result.
-// -------------------------------------------------------------------------
 echo "\n" . str_repeat('-', 32) . "\n";
 echo "Passed: {$passed}\n";
 echo "Failed: " . count($failures) . "\n";
