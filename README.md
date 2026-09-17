@@ -44,13 +44,40 @@ PHP 8.1+ and MySQL 8/MariaDB are recommended.
 - Use HTTPS.
 - Back up the MySQL database regularly.
 
+## CI/CD
+
+The `saas-rebuild` branch runs the automated regression suite through GitHub Actions. Production deployment is gated behind a successful `Automated Tests` run on `main`.
+
+The production workflow is `.github/workflows/deploy.yml`. It:
+
+1. Deploys the exact commit that passed the test workflow.
+2. Uses SSH with a deployment key and pinned `known_hosts`.
+3. Syncs application files with `rsync` while preserving server-side `config.php` and `storage/`.
+4. Runs `php bin/migrate.php` on the server.
+5. Runs a production bootstrap smoke check.
+6. Serializes deployments with a GitHub Actions concurrency lock.
+
+Create a GitHub environment named `production` and add these secrets:
+
+- `DEPLOY_HOST` — production server hostname/IP
+- `DEPLOY_USER` — SSH deployment user
+- `DEPLOY_PATH` — absolute application directory on the server
+- `DEPLOY_SSH_KEY` — private SSH key used only for deployment
+- `DEPLOY_KNOWN_HOSTS` — pinned SSH host key line(s) for the production server
+
+Keep `config.php`, database credentials, `APP_KEY`, OAuth secrets, payment secrets, and other runtime secrets on the server/environment; they must not be committed to Git.
+
+### Production deployment flow
+
+`push/PR → Automated Tests → merge to main → Automated Tests on main → Production Deploy → migrations → smoke check`
+
+A manual `workflow_dispatch` is also available for an intentional production deployment from `main`.
 
 ## Public Passenger Seat Plan
 Open `seat_plan.php` publicly. Passengers can select an active tour and bus and see available/booked seats. No login and no booking action are exposed. Booked passenger names/details are intentionally hidden for privacy. Configure the public contact phone/WhatsApp/message from Admin → Settings.
 
 ### V2 → Public Seat Plan migration
 If V2 is already installed, import `db_upgrade_from_v2_public_seat_plan.sql` once before using the public seat plan. Then enter contact phone/WhatsApp in Settings.
-
 
 ## V3.1 Multiple Public Contacts
 Admin Settings now supports unlimited contact rows per tour. Each row can have a label, phone, and WhatsApp number. The public seat plan displays every active contact with Call/WhatsApp buttons. Existing V3 contact fields are migrated automatically by `db_upgrade_from_v3_multiple_contacts.sql`.
