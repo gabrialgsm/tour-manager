@@ -9,6 +9,8 @@ const PASSENGER_AUTH_BLOCK = 900;
 const PASSENGER_RESET_IP_LIMIT = 10;
 const PASSENGER_RESET_EMAIL_LIMIT = 5;
 const PASSENGER_RESET_BLOCK = 900;
+const PASSENGER_OAUTH_IP_LIMIT = 20;
+const PASSENGER_OAUTH_BLOCK = 900;
 
 function passenger_auth_rate_key(string $kind,string $value): string {
     return hash_hmac('sha256',strtoupper($kind).'|'.strtolower(trim($value)),saas_app_key());
@@ -56,6 +58,16 @@ function passenger_reset_rate_fail(string $email): void {
 }
 function passenger_reset_rate_success(string $email): void {
     $db=saas_db();foreach([['RESET_IP',passenger_auth_client_ip()],['RESET_EMAIL',$email]] as [$kind,$value]){if($value==='')continue;$db->prepare('DELETE FROM passenger_auth_rate_limits WHERE rate_key=?')->execute([passenger_auth_rate_key($kind,$value)]);}
+}
+function passenger_oauth_rate_limited(): bool {
+    return passenger_auth_rate_blocked('OAUTH_IP',passenger_auth_client_ip(),PASSENGER_OAUTH_IP_LIMIT);
+}
+function passenger_oauth_rate_fail(): void {
+    passenger_auth_rate_record('OAUTH_IP',passenger_auth_client_ip(),PASSENGER_OAUTH_IP_LIMIT,PASSENGER_OAUTH_BLOCK);
+}
+function passenger_oauth_rate_success(): void {
+    $value=passenger_auth_client_ip();
+    if($value!=='')saas_db()->prepare('DELETE FROM passenger_auth_rate_limits WHERE rate_key=?')->execute([passenger_auth_rate_key('OAUTH_IP',$value)]);
 }
 function passenger_auth_rate_cleanup(): void {
     if(random_int(1,100)===1)saas_db()->exec("DELETE FROM passenger_auth_rate_limits WHERE updated_at<DATE_SUB(NOW(),INTERVAL 2 DAY)");
