@@ -1,0 +1,11 @@
+# Tour Manager SaaS
+# Keep direct PHP endpoints working while exposing clean public tour URLs.
+
+RewriteEngine On
+
+# /tour/{slug} -> public_tour.php?slug={slug}
+# Only match one slug segment; existing files/directories are left untouched.
+RewriteRule ^tour/([A-Za-z0-9][A-Za-z0-9_-]*)/?$ public_tour.php?slug=$1 [L,QSA]
+
+# Prevent accidental directory listing.
+Options -Indexes

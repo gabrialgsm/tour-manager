@@ -1,5 +1,6 @@
 -- Passenger self-service authentication foundation.
 -- Accounts are organization-scoped and linked to reusable passenger profiles.
+-- This is the single canonical migration for passenger authentication.
 CREATE TABLE IF NOT EXISTS passenger_accounts (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
  organization_id BIGINT UNSIGNED NOT NULL,

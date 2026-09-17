@@ -1,0 +1,27 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/passenger_auth_helpers.php';
+require __DIR__.'/passenger_auth_rate_limit.php';
+$db=saas_db();
+$token=trim((string)($_GET['token']??$_POST['token']??''));$error='';$ok='';$resetUrl='';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+ try{
+  saas_check_csrf();
+  if($token!==''){
+   if(!preg_match('/^[a-f0-9]{64}$/',$token))throw new RuntimeException('This reset link is invalid or expired.');
+   $q=$db->prepare("SELECT ppr.id,ppr.passenger_account_id,pa.status FROM passenger_password_resets ppr JOIN passenger_accounts pa ON pa.id=ppr.passenger_account_id WHERE ppr.token_hash=? AND ppr.used_at IS NULL AND ppr.expires_at>NOW() LIMIT 1");$q->execute([hash('sha256',$token)]);$r=$q->fetch();
+   if(!$r||$r['status']!=='ACTIVE')throw new RuntimeException('This reset link is invalid or expired.');
+   $pw=(string)($_POST['password']??'');$pw2=(string)($_POST['password_confirm']??'');if(strlen($pw)<8)throw new RuntimeException('Password must be at least 8 characters.');if(!hash_equals($pw,$pw2))throw new RuntimeException('Passwords do not match.');
+   $db->beginTransaction();$db->prepare('UPDATE passenger_accounts SET password_hash=? WHERE id=?')->execute([password_hash($pw,PASSWORD_DEFAULT),(int)$r['passenger_account_id']]);$db->prepare('UPDATE passenger_password_resets SET used_at=NOW() WHERE id=?')->execute([(int)$r['id']]);$db->prepare('UPDATE passenger_sessions SET revoked_at=COALESCE(revoked_at,NOW()) WHERE passenger_account_id=? AND revoked_at IS NULL')->execute([(int)$r['passenger_account_id']]);$db->commit();$ok='Your password has been reset. You can now log in.';$token='';
+  }else{
+   $email=strtolower(trim((string)($_POST['email']??'')));if(!filter_var($email,FILTER_VALIDATE_EMAIL))throw new RuntimeException('Enter a valid email address.');
+   if(passenger_reset_rate_limited($email))throw new RuntimeException('Too many reset requests. Please try again later.');
+   passenger_reset_rate_fail($email);
+   $q=$db->prepare("SELECT id FROM passenger_accounts WHERE LOWER(email)=LOWER(?) AND status='ACTIVE' LIMIT 2");$q->execute([$email]);$rows=$q->fetchAll();
+   if(count($rows)===1){$accountId=(int)$rows[0]['id'];$raw=bin2hex(random_bytes(32));$db->prepare('UPDATE passenger_password_resets SET used_at=NOW() WHERE passenger_account_id=? AND used_at IS NULL')->execute([$accountId]);$db->prepare('INSERT INTO passenger_password_resets(passenger_account_id,token_hash,expires_at) VALUES(?,?,DATE_ADD(NOW(),INTERVAL 30 MINUTE))')->execute([$accountId,hash('sha256',$raw)]);$config=require __DIR__.'/config.php';$base=rtrim((string)($config['app']['base_url']??''),'/');if($base==='')$base=(isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off'?'https':'http').'://'.($_SERVER['HTTP_HOST']??'');$resetUrl=rtrim($base,'/').'/passenger_password_reset.php?token='.rawurlencode($raw);}
+   $ok='If an active passenger account exists for that email, a reset link has been generated.';
+  }
+ }catch(Throwable $e){if($db->inTransaction())$db->rollBack();$error=$e->getMessage();}
+}
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reset Password</title><style>body{font-family:system-ui,Arial;background:#f4f7fb;margin:0;color:#172033}.wrap{max-width:480px;margin:55px auto;padding:16px}.card{background:#fff;border-radius:18px;padding:25px;box-shadow:0 8px 30px #0001}label{display:block;font-weight:700;margin:12px 0 6px}input,button{width:100%;box-sizing:border-box;padding:12px;border:1px solid #d0d5dd;border-radius:9px;font:inherit}button{background:#155eef;color:#fff;border-color:#155eef;font-weight:700;margin-top:14px}.msg{padding:11px;border-radius:9px;margin-bottom:14px}.err{background:#fef3f2;color:#b42318}.ok{background:#ecfdf3;color:#067647}.url{word-break:break-all;background:#f8fafc;padding:12px;border-radius:9px;margin-top:12px}.muted{color:#667085;font-size:13px}a{color:#155eef}</style></head><body><main class="wrap"><div class="card"><p><a href="passenger_auth.php">← Passenger Login</a></p><h1>Reset Password</h1><?php if($error):?><div class="msg err"><?=saas_h($error)?></div><?php endif;?><?php if($ok):?><div class="msg ok"><?=saas_h($ok)?></div><?php if($resetUrl!==''):?><div class="url"><a href="<?=saas_h($resetUrl)?>">Open reset link</a><br><?=saas_h($resetUrl)?></div><p class="muted">Email delivery is not configured yet; connect SMTP/mail before production use.</p><?php endif;?><?php endif;?><?php if($token!==''):?><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="token" value="<?=saas_h($token)?>"><label>New password</label><input type="password" name="password" minlength="8" required autocomplete="new-password"><label>Confirm password</label><input type="password" name="password_confirm" minlength="8" required autocomplete="new-password"><button>Reset password</button></form><?php elseif($ok===''):?><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><label>Email</label><input type="email" name="email" required autocomplete="email"><button>Generate reset link</button></form><?php endif;?></div></main></body></html>
