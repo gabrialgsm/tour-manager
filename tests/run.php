@@ -125,7 +125,7 @@ foreach ($permissionContracts as $file => $permission) {
 }
 
 $securityContracts = [
-    'saas_booking_link.php' => ['hash('sha256'', 'random_bytes(32)', 'booking_access_token_hash'],
+    'saas_booking_link.php' => ["hash('sha256'", 'random_bytes(32)', 'booking_access_token_hash'],
     'passenger_auth.php' => ['password_verify(', 'passenger_auth_rate_limited('],
     'passenger_google_auth.php' => ['random_bytes(32)', 'passenger_auth_rate_limited('],
     'passenger_facebook_auth.php' => ['random_bytes(32)', 'passenger_auth_rate_limited('],
@@ -136,7 +136,7 @@ $securityContracts = [
     'public_checkout.php' => ['payment_intents', 'FOR UPDATE', 'feature_total'],
     'saas_payment_intents.php' => ['FOR UPDATE', 'SUCCEEDED', 'saas_issue_ticket('],
     'saas_ticket_service.php' => ['hash_hmac', 'qr_token_hash', 'forceReissue'],
-    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', 'status=\'ISSUED\''],
+    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "status='ISSUED'"],
 ];
 foreach ($securityContracts as $file => $needles) {
     $text = file_text($file);
