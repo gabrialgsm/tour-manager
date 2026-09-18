@@ -199,6 +199,22 @@ test_assert(in_array('013_migration_tracking', $versions, true), 'Migration trac
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
+$mailText = file_text('saas_mail.php');
+test_assert(
+    $mailText !== '' &&
+    has_all($mailText, ['stream_socket_client', 'stream_socket_enable_crypto', 'AUTH PLAIN', 'AUTH LOGIN']),
+    'Production SMTP mailer supports authenticated TLS delivery'
+);
+$resetText = file_text('passenger_password_reset.php');
+test_assert(
+    $resetText !== '' &&
+    str_contains($resetText, "require __DIR__.'/saas_mail.php';") &&
+    str_contains($resetText, 'saas_send_email(') &&
+    !str_contains($resetText, '$resetUrl</div>') &&
+    !str_contains($resetText, 'Email delivery is not configured yet'),
+    'Password reset uses email delivery without exposing reset URLs in the web response'
+);
+
 echo "\n" . str_repeat('-', 32) . "\n";
 echo "Passed: {$passed}\n";
 echo "Failed: " . count($failures) . "\n";

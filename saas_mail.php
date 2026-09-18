@@ -1,0 +1,197 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Minimal dependency-free SMTP mailer for production transactional email.
+ * Supports SMTP AUTH LOGIN/PLAIN and TLS/STARTTLS.
+ */
+function saas_mail_config(): array
+{
+    global $config;
+    $mail = $config['mail'] ?? [];
+    return [
+        'enabled' => (bool)($mail['enabled'] ?? false),
+        'host' => trim((string)($mail['host'] ?? '')),
+        'port' => (int)($mail['port'] ?? 587),
+        'encryption' => strtolower(trim((string)($mail['encryption'] ?? 'starttls'))),
+        'username' => (string)($mail['username'] ?? ''),
+        'password' => (string)($mail['password'] ?? ''),
+        'from_email' => trim((string)($mail['from_email'] ?? '')),
+        'from_name' => trim((string)($mail['from_name'] ?? ($config['app']['name'] ?? 'GoTM'))),
+        'timeout' => max(5, min(30, (int)($mail['timeout'] ?? 15))),
+    ];
+}
+
+function saas_mail_response($socket): string
+{
+    $response = '';
+    while (($line = fgets($socket, 515)) !== false) {
+        $response .= $line;
+        if (isset($line[3]) && $line[3] === ' ') {
+            break;
+        }
+    }
+    if ($response === '') {
+        throw new RuntimeException('SMTP server closed the connection.');
+    }
+    $code = (int)substr($response, 0, 3);
+    if ($code < 200 || $code >= 400) {
+        throw new RuntimeException('SMTP command failed with response '.$code.'.');
+    }
+    return $response;
+}
+
+function saas_mail_command($socket, string $command, array $expectedCodes): string
+{
+    fwrite($socket, $command."
+");
+    $response = saas_mail_response($socket);
+    $code = (int)substr($response, 0, 3);
+    if (!in_array($code, $expectedCodes, true)) {
+        throw new RuntimeException('Unexpected SMTP response '.$code.'.');
+    }
+    return $response;
+}
+
+function saas_mail_header(string $name, string $value): string
+{
+    $value = str_replace(["", "
+"], '', $value);
+    return $name.': '.$value;
+}
+
+function saas_send_email(string $to, string $subject, string $html, ?string $text = null): void
+{
+    $mail = saas_mail_config();
+    if (!$mail['enabled']) {
+        throw new RuntimeException('Transactional email is not enabled.');
+    }
+    if ($mail['host'] === '' || $mail['from_email'] === '' || !filter_var($mail['from_email'], FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Transactional email is not configured.');
+    }
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Invalid recipient email.');
+    }
+    if ($mail['port'] < 1 || $mail['port'] > 65535) {
+        throw new RuntimeException('Invalid SMTP port.');
+    }
+    if (!in_array($mail['encryption'], ['starttls', 'ssl', 'none'], true)) {
+        throw new RuntimeException('Invalid SMTP encryption mode.');
+    }
+
+    $target = $mail['encryption'] === 'ssl'
+        ? 'ssl://'.$mail['host'].':'.$mail['port']
+        : 'tcp://'.$mail['host'].':'.$mail['port'];
+
+    $errno = 0;
+    $errstr = '';
+    $socket = @stream_socket_client(
+        $target,
+        $errno,
+        $errstr,
+        $mail['timeout'],
+        STREAM_CLIENT_CONNECT
+    );
+    if (!$socket) {
+        throw new RuntimeException('Unable to connect to SMTP server.');
+    }
+
+    stream_set_timeout($socket, $mail['timeout']);
+
+    try {
+        saas_mail_response($socket);
+
+        $hostname = gethostname() ?: 'gotmx.app';
+        saas_mail_command($socket, 'EHLO '.$hostname, [250]);
+
+        if ($mail['encryption'] === 'starttls') {
+            saas_mail_command($socket, 'STARTTLS', [220]);
+            $cryptoOk = stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            if ($cryptoOk !== true) {
+                throw new RuntimeException('Unable to establish SMTP TLS.');
+            }
+            saas_mail_command($socket, 'EHLO '.$hostname, [250]);
+        }
+
+        if ($mail['username'] !== '') {
+            if ($mail['password'] === '') {
+                throw new RuntimeException('SMTP password is not configured.');
+            }
+
+            // Prefer AUTH PLAIN; fall back to LOGIN if the server rejects it.
+            $auth = base64_encode("\0".$mail['username']."\0".$mail['password']);
+            fwrite($socket, "AUTH PLAIN ".$auth."\r\n");
+            $response = saas_mail_response($socket);
+            $code = (int)substr($response, 0, 3);
+            if ($code === 334) {
+                // Some SMTP servers request the PLAIN payload separately.
+                fwrite($socket, $auth."\r\n");
+                $response = saas_mail_response($socket);
+                $code = (int)substr($response, 0, 3);
+            }
+            if ($code !== 235) {
+                saas_mail_command($socket, 'AUTH LOGIN', [334]);
+                saas_mail_command($socket, base64_encode($mail['username']), [334]);
+                saas_mail_command($socket, base64_encode($mail['password']), [235]);
+            }
+        }
+
+        saas_mail_command($socket, 'MAIL FROM:<'.$mail['from_email'].'>', [250]);
+        saas_mail_command($socket, 'RCPT TO:<'.$to.'>', [250, 251]);
+        saas_mail_command($socket, 'DATA', [354]);
+
+        $text = $text ?? trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "
+", $html)));
+        $boundary = '=_GoTM_'.bin2hex(random_bytes(12));
+        $fromName = $mail['from_name'] !== '' ? $mail['from_name'] : 'GoTM';
+
+        $headers = [
+            saas_mail_header('From', '"'.addcslashes($fromName, "\"").'" <'.$mail['from_email'].'>'),
+            saas_mail_header('To', $to),
+            saas_mail_header('Subject', $subject),
+            'Date: '.date(DATE_RFC2822),
+            'MIME-Version: 1.0',
+            'Content-Type: multipart/alternative; boundary="'.$boundary.'"',
+        ];
+
+        $message = implode("
+", $headers)."
+
+";
+        $message .= '--'.$boundary."
+";
+        $message .= "Content-Type: text/plain; charset=UTF-8
+";
+        $message .= "Content-Transfer-Encoding: 8bit
+
+";
+        $message .= str_replace(["
+", ""], "
+", $text)."
+
+";
+        $message .= '--'.$boundary."
+";
+        $message .= "Content-Type: text/html; charset=UTF-8
+";
+        $message .= "Content-Transfer-Encoding: 8bit
+
+";
+        $message .= str_replace(["
+", ""], "
+", $html)."
+";
+        $message .= '--'.$boundary."--
+";
+
+        // SMTP DATA uses dot-stuffing for lines beginning with a dot.
+        $message = preg_replace('/(?m)^\./', '..', $message) ?? $message;
+        fwrite($socket, $message."
+.
+");
+        saas_mail_response($socket);
+        saas_mail_command($socket, 'QUIT', [221, 250]);
+    } finally {
+        fclose($socket);
+    }
+}

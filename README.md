@@ -39,3 +39,29 @@ A local backup alone is not sufficient if the production VPS is lost. Copy backu
 ## CI/CD
 
 The `saas-rebuild` branch runs automated regression tests through GitHub Actions. Production deployment is gated behind successful tests on `main` and uses SSH with pinned `known_hosts`.
+
+## Production Email
+
+Transactional passenger email is handled through the dependency-free SMTP helper `saas_mail.php`.
+
+Configure the `mail` section in the production-only `config.php` (never commit SMTP credentials):
+
+```php
+'mail'=>[
+  'enabled'=>true,
+  'host'=>'smtp.example.com',
+  'port'=>587,
+  'encryption'=>'starttls',
+  'username'=>'SMTP_USERNAME',
+  'password'=>'SMTP_PASSWORD',
+  'from_email'=>'no-reply@gotmx.app',
+  'from_name'=>'GoTM — GoZyraa Tour Management',
+  'timeout'=>15,
+],
+```
+
+Supported encryption modes are `starttls`, `ssl`, and `none`. For production, use TLS/STARTTLS and an SMTP account authorized to send from the configured From address.
+
+Passenger password reset now sends the one-time 30-minute reset link by email. The reset token is stored only as a SHA-256 hash, and the reset URL is never displayed in the web response. If SMTP delivery fails, the application keeps the public response generic and records only a server-side error message.
+
+After configuring SMTP, test the full flow from `Passenger Login → Forgot Password` and verify both delivery and successful one-time password reset.
