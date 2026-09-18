@@ -240,9 +240,9 @@ test_assert(
  $billingText=file_text('saas_billing.php');
  test_assert($billingText!=='' && has_all($billingText,['organization.manage','saas_plan(','saas_entitlement(','billing_events','saas_check_csrf()']), 'Billing UI is organization-admin protected, CSRF guarded and audit/event ready');
  $tourCreateText=file_text('tour_create.php');
- test_assert($tourCreateText!=='' && str_contains($tourCreateText,"saas_require_limit($orgId,'max_tours'"), 'Tour creation enforces centralized max_tours entitlement');
+ test_assert($tourCreateText!=='' && str_contains($tourCreateText, 'saas_require_limit($orgId,\'max_tours\''), 'Tour creation enforces centralized max_tours entitlement');
  $featureSettingsText=file_text('saas_features.php');
- test_assert($featureSettingsText!=='' && str_contains($featureSettingsText,"saas_require_entitlement($orgId,'custom_features'"), 'Custom tour features enforce centralized entitlement');
+ test_assert($featureSettingsText!=='' && str_contains($featureSettingsText, 'saas_require_entitlement($orgId,\'custom_features\''), 'Custom tour features enforce centralized entitlement');
  $publicText=file_text('saas_public.php');
  test_assert($publicText!=='' && str_contains($publicText,"saas_has_entitlement($orgId,'custom_branding')"), 'Custom public-page branding enforces centralized entitlement');
  
