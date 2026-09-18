@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 $config=require __DIR__.'/config.php';
-date_default_timezone_set($config['app']['timezone']??'Asia/Dhaka');
+date_default_timezone_set($config['app']['timezone']??'Asia/Dhaka'); 
 session_name('GMJSSESSID');
 session_set_cookie_params(['httponly'=>true,'secure'=>(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off'),'samesite'=>'Lax']);
 session_start();
