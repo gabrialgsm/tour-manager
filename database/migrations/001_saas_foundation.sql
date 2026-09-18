@@ -8,8 +8,6 @@ SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 START TRANSACTION;
 
-CREATE TABLE `schema_migrations` (`version` varchar(100) NOT NULL, `applied_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`version`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE `users` (
  `id` bigint unsigned NOT NULL AUTO_INCREMENT, `name` varchar(150) NOT NULL, `email` varchar(190) NOT NULL, `phone` varchar(40) DEFAULT NULL, `password_hash` varchar(255) NOT NULL,
  `status` enum('ACTIVE','INVITED','SUSPENDED','DELETED') NOT NULL DEFAULT 'ACTIVE', `email_verified_at` timestamp NULL DEFAULT NULL, `last_login_at` timestamp NULL DEFAULT NULL,
@@ -242,5 +240,4 @@ CREATE TABLE `usage_records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `plans` (`plan_key`,`name`) VALUES ('free','Free'),('pro','Pro'),('business','Business'),('enterprise','Enterprise');
-INSERT INTO `schema_migrations` (`version`) VALUES ('001_saas_foundation');
 COMMIT;
