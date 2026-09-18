@@ -21,15 +21,15 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         if(!$member) throw new RuntimeException('Select an active organization member.');
 
         if($action==='remove') {
-            $q=$db->prepare("SELECT id,user_id,role FROM tour_members WHERE id=? AND tour_id=? AND user_id=? LIMIT 1 FOR UPDATE");
-            $q->execute([$memberId,$tourId,(int)$member['user_id']]);
+            $q=$db->prepare("SELECT id,user_id,role FROM tour_members WHERE tour_id=? AND user_id=? LIMIT 1 FOR UPDATE");
+            $q->execute([$tourId,(int)$member['user_id']]);
             $tm=$q->fetch();
             if(!$tm) throw new RuntimeException('Tour assignment not found.');
             if($tm['role']==='OWNER') throw new RuntimeException('The tour owner cannot be removed.');
             $q=$db->prepare("DELETE FROM tour_members WHERE id=? AND tour_id=?");
-            $q->execute([$memberId,$tourId]);
+            $q->execute([(int)$tm['id'],$tourId]);
             $db->commit();
-            saas_audit('tour.member_removed','tour_member',$memberId,json_encode(['tour_id'=>$tourId,'user_id'=>(int)$member['user_id']],JSON_UNESCAPED_UNICODE));
+            saas_audit('tour.member_removed','tour_member',(int)$tm['id'],json_encode(['tour_id'=>$tourId,'user_id'=>(int)$member['user_id']],JSON_UNESCAPED_UNICODE));
             $ok='Tour team assignment removed.';
         } else {
             $role=strtoupper(trim((string)($_POST['role']??'STAFF')));
