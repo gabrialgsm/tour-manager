@@ -262,3 +262,14 @@ select{cursor:pointer;appearance:auto}
   outline-offset:2px;
   transform:translateY(-2px) scale(1.03)!important;
 }
+
+
+/* GoTM brand system — official GoZyraa Tour Management palette */
+:root{--gotm-navy:#0B2A49;--gotm-gold:#F7AB17;--gotm-white:#FFFFFF;--gotm-navy-soft:#123B60;--gotm-gold-soft:#FFF4D6}
+.topbar{background:linear-gradient(135deg,var(--gotm-navy),#123B60)!important}
+.btn.primary{background:linear-gradient(135deg,var(--gotm-gold),#D88B00)!important;color:#10243A!important}
+.tabs a:hover,.tabs a.active{background:#FFF4D6!important;color:#0B2A49!important}
+.stat:before{background:var(--gotm-gold)!important}
+.brand{color:var(--gotm-navy)!important}
+.toast{background:var(--gotm-navy)!important;border-left-color:var(--gotm-gold)!important}
+.seat-tab.active,.bus-tab.active{background:var(--gotm-navy)!important}

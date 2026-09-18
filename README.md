@@ -1,4 +1,11 @@
-# GMJS Tour Manager — FINAL RELEASE
+# GoTM — GoZyraa Tour Management
+
+Production-oriented PHP + MySQL tour management system.
+
+**Official domain:** `https://gotmx.app`  
+**Brand palette:** deep navy, white, and dark yellow/gold.
+
+**Production database:** `tour-manager` (credentials are supplied through server environment variables; never commit database passwords).
 
 Production-oriented PHP + MySQL tour management system.
 
