@@ -166,6 +166,19 @@ test_assert(
 );
 
 // Payment records must not be created by a public checkout before confirmation.
+// Passenger/Auth + booking UX contracts.
+foreach (['passenger_auth.php','passenger_dashboard.php','public_booking.php','public_seat_select.php','public_room_select.php','public_features.php','public_checkout.php','passenger_password_reset.php'] as $uxFile) {
+    $ux = file_text($uxFile);
+    test_assert($ux !== '' && str_contains($ux, '<meta name="viewport"'), "Passenger/booking UX is responsive: {$uxFile}");
+    test_assert($ux !== '' && str_contains($ux, 'font-family:'), "Passenger/booking UX has dedicated visual styling: {$uxFile}");
+}
+$bookingUx = file_text('public_booking.php');
+test_assert(
+    $bookingUx !== '' &&
+    has_all($bookingUx, ['My Booking','Select seat','Select room','Payment','Your ticket']),
+    'Booking portal exposes the complete passenger action flow'
+);
+
 $checkoutText = file_text('public_checkout.php');
 test_assert(
     $checkoutText !== '' &&
@@ -216,9 +229,11 @@ test_assert(
 );
 
 
+
 // -------------------------------------------------------------------------
 // Organization / team management contracts.
 // -------------------------------------------------------------------------
+
 $teamText = file_text('saas_team.php');
 test_assert(
     $teamText !== '' &&
