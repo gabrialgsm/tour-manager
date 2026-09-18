@@ -1,5 +1,53 @@
 -- Performance indexes for high-frequency tour, booking, payment and allocation queries.
+-- Also normalizes legacy column names found in earlier production schemas.
 -- Safe to run once through bin/migrate.php.
+
+-- Legacy compatibility:
+-- Older installations used passenger_id in payments/room_assignments.
+-- The canonical application contract uses tour_passenger_id.
+SET @gotm_rename_payments = (
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'payments'
+        AND COLUMN_NAME = 'passenger_id'
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'payments'
+        AND COLUMN_NAME = 'tour_passenger_id'
+    )
+    THEN 'ALTER TABLE payments CHANGE COLUMN passenger_id tour_passenger_id BIGINT UNSIGNED NOT NULL'
+    ELSE 'SELECT 1'
+  END
+);
+PREPARE gotm_stmt FROM @gotm_rename_payments;
+EXECUTE gotm_stmt;
+DEALLOCATE PREPARE gotm_stmt;
+
+SET @gotm_rename_rooms = (
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'room_assignments'
+        AND COLUMN_NAME = 'passenger_id'
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'room_assignments'
+        AND COLUMN_NAME = 'tour_passenger_id'
+    )
+    THEN 'ALTER TABLE room_assignments CHANGE COLUMN passenger_id tour_passenger_id BIGINT UNSIGNED NOT NULL'
+    ELSE 'SELECT 1'
+  END
+);
+PREPARE gotm_stmt FROM @gotm_rename_rooms;
+EXECUTE gotm_stmt;
+DEALLOCATE PREPARE gotm_stmt;
 
 CREATE INDEX idx_tp_tour_status_profile
   ON tour_passengers(tour_id,status,passenger_profile_id);
