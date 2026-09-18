@@ -244,7 +244,7 @@ test_assert(
  $featureSettingsText=file_text('saas_features.php');
  test_assert($featureSettingsText!=='' && str_contains($featureSettingsText, 'saas_require_entitlement($orgId,\'custom_features\''), 'Custom tour features enforce centralized entitlement');
  $publicText=file_text('saas_public.php');
- test_assert($publicText!=='' && str_contains($publicText,"saas_has_entitlement($orgId,'custom_branding')"), 'Custom public-page branding enforces centralized entitlement');
+ test_assert($publicText!=='' && str_contains($publicText, 'saas_has_entitlement($orgId,\'custom_branding\')'), 'Custom public-page branding enforces centralized entitlement');
  
 // -------------------------------------------------------------------------
 // Organization / team management contracts.
