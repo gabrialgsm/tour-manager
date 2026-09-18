@@ -175,7 +175,7 @@ foreach (['passenger_auth.php','passenger_dashboard.php','public_booking.php','p
 $bookingUx = file_text('public_booking.php');
 test_assert(
     $bookingUx !== '' &&
-    has_all($bookingUx, ['Manage Booking','Select seat','Select room','Payment','Your ticket']),
+    has_all($bookingUx, ['My Booking','Select seat','Select room','Payment','Your ticket']),
     'Booking portal exposes the complete passenger action flow'
 );
 
