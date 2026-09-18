@@ -137,7 +137,7 @@ $securityContracts = [
     'public_checkout.php' => ['payment_intents', 'FOR UPDATE', 'feature_total'],
     'saas_payment_intents.php' => ['FOR UPDATE', 'SUCCEEDED', 'saas_issue_ticket('],
     'saas_ticket_service.php' => ['hash_hmac', 'qr_token_hash', 'forceReissue'],
-    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "status==='ISSUED'", 'voided_at'],
+    'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "['status']==='ISSUED'", 'voided_at'],
 ];
 foreach ($securityContracts as $file => $needles) {
     $text = file_text($file);
@@ -177,7 +177,9 @@ test_assert(
 // Ticket verification must reject revoked/voided tickets.
 $verifyText = file_text('ticket_verify.php');
 test_assert(
-    $verifyText !== '' && str_contains($verifyText, "status==='ISSUED'") && str_contains($verifyText, 'voided_at'),
+    $verifyText !== '' &&
+    str_contains($verifyText, "['status']==='ISSUED'") &&
+    str_contains($verifyText, 'voided_at'),
     'Ticket verification checks issued/non-voided status'
 );
 
