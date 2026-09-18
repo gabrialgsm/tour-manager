@@ -81,7 +81,7 @@ function saas_billing_usage(int $organizationId): array
     $q->execute([$organizationId]); $usage['tours']=(int)$q->fetchColumn();
     $q = $db->prepare("SELECT COUNT(*) FROM organization_members WHERE organization_id=? AND status='ACTIVE'");
     $q->execute([$organizationId]); $usage['members']=(int)$q->fetchColumn();
-    $q = $db->prepare("SELECT COUNT(*) FROM tour_passengers tp JOIN tours t ON t.id=tp.tour_id WHERE t.organization_id=? AND tp.status<>'CANCELLED'");
+    $q = $db->prepare("SELECT COALESCE(MAX(passenger_count),0) FROM (SELECT tp.tour_id,COUNT(*) passenger_count FROM tour_passengers tp JOIN tours t ON t.id=tp.tour_id WHERE t.organization_id=? AND tp.status<>'CANCELLED' GROUP BY tp.tour_id) x");
     $q->execute([$organizationId]); $usage['passengers']=(int)$q->fetchColumn();
     return $usage;
 }
