@@ -24,6 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($identity === '') throw new RuntimeException('Enter a username or email.');
             if (!in_array($role, ['ADMIN','MANAGER','STAFF'], true)) throw new RuntimeException('New members cannot be added directly as OWNER.');
             $db->beginTransaction();
+            $q = $db->prepare('SELECT id FROM organizations WHERE id=? FOR UPDATE');
+            $q->execute([$orgId]);
+            if (!$q->fetch()) throw new RuntimeException('Organization not found.');
+            $q = $db->prepare("SELECT COUNT(*) FROM organization_members WHERE organization_id=? AND status='ACTIVE'");
+            $q->execute([$orgId]);
+            $memberCount = (int)$q->fetchColumn();
+            $q = $db->prepare("SELECT id,status FROM organization_members WHERE organization_id=? AND user_id=? LIMIT 1 FOR UPDATE");
+            $q->execute([$orgId, (int)($_POST['user_id'] ?? 0)]);
+            $existingById = $q->fetch();
+            if (!$existingById && !saas_limit_allows($orgId,'max_members',$memberCount)) throw new RuntimeException('Your current plan has reached its team member limit. Open Billing to upgrade your plan.');
             $q = $db->prepare("SELECT id,name,username,email,status FROM users WHERE (username=? OR email=?) LIMIT 1 FOR UPDATE");
             $q->execute([$identity, $identity]);
             $user = $q->fetch();
