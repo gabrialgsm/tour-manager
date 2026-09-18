@@ -229,6 +229,11 @@ test_assert(
 );
 
 
+
+// -------------------------------------------------------------------------
+// Organization / team management contracts.
+// -------------------------------------------------------------------------
+
 $teamText = file_text('saas_team.php');
 test_assert(
     $teamText !== '' &&
