@@ -215,6 +215,29 @@ test_assert(
     'Password reset uses email delivery without exposing reset URLs in the web response'
 );
 
+
+// -------------------------------------------------------------------------
+// Organization / team management contracts.
+// -------------------------------------------------------------------------
+$teamText = file_text('saas_team.php');
+test_assert(
+    $teamText !== '' &&
+    has_all($teamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'organization_members', 'FOR UPDATE', 'organization.owner_transferred']),
+    'Organization team management has permission, CSRF, scoped locking and ownership-transfer controls'
+);
+$tourTeamText = file_text('saas_tour_team.php');
+test_assert(
+    $tourTeamText !== '' &&
+    has_all($tourTeamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'tour_members', 'organization_id', 'FOR UPDATE']),
+    'Tour team management is organization-scoped with permission, CSRF and row locking'
+);
+test_assert(
+    $tourTeamText !== '' &&
+    str_contains($tourTeamText, "['role']==='OWNER'") &&
+    str_contains($tourTeamText, 'cannot be removed'),
+    'Tour owner cannot be removed through team management'
+);
+
 echo "\n" . str_repeat('-', 32) . "\n";
 echo "Passed: {$passed}\n";
 echo "Failed: " . count($failures) . "\n";
