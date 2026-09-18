@@ -30,10 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $q = $db->prepare("SELECT COUNT(*) FROM organization_members WHERE organization_id=? AND status='ACTIVE'");
             $q->execute([$orgId]);
             $memberCount = (int)$q->fetchColumn();
-            $q = $db->prepare("SELECT id,status FROM organization_members WHERE organization_id=? AND user_id=? LIMIT 1 FOR UPDATE");
-            $q->execute([$orgId, (int)($_POST['user_id'] ?? 0)]);
-            $existingById = $q->fetch();
-            if (!$existingById && !saas_limit_allows($orgId,'max_members',$memberCount)) throw new RuntimeException('Your current plan has reached its team member limit. Open Billing to upgrade your plan.');
             $q = $db->prepare("SELECT id,name,username,email,status FROM users WHERE (username=? OR email=?) LIMIT 1 FOR UPDATE");
             $q->execute([$identity, $identity]);
             $user = $q->fetch();
@@ -41,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $q = $db->prepare("SELECT id,status FROM organization_members WHERE organization_id=? AND user_id=? LIMIT 1 FOR UPDATE");
             $q->execute([$orgId, (int)$user['id']]);
             $existing = $q->fetch();
+            if (!$existing && !saas_limit_allows($orgId,'max_members',$memberCount)) throw new RuntimeException('Your current plan has reached its team member limit. Open Billing to upgrade your plan.');
             if ($existing) {
                 if ($existing['status'] === 'ACTIVE') throw new RuntimeException('This user is already a team member.');
                 $q = $db->prepare("UPDATE organization_members SET role=?,status='ACTIVE' WHERE id=?");
