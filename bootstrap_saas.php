@@ -16,45 +16,39 @@ session_set_cookie_params([
 ]);
 session_start();
 
-// Baseline browser hardening for every SaaS request.
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-if ($isHttps && $appEnv === 'production') {
-    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-}
+if ($isHttps && $appEnv === 'production') header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 
 function saas_db(): PDO
 {
     static $pdo;
     global $config;
     if (!$pdo) {
-        $d = $config['db'];
-        $pdo = new PDO(
-            "mysql:host={$d['host']};dbname={$d['name']};charset=utf8mb4",
-            $d['user'], $d['pass'],
-            [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]
-        );
+        $d=$config['db'];
+        $pdo=new PDO("mysql:host={$d['host']};dbname={$d['name']};charset=utf8mb4",$d['user'],$d['pass'],[
+            PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false
+        ]);
     }
     return $pdo;
 }
 function saas_app_key(): string
 {
-    global $config;
-    $key=(string)($config['app']['key']??'');
+    global $config;$key=(string)($config['app']['key']??'');
     if(strlen($key)<32 || str_contains($key,'CHANGE_THIS')) throw new RuntimeException('APP_KEY is not configured.');
     return $key;
 }
 function saas_h(mixed $value): string { return htmlspecialchars((string)$value,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); }
-function saas_redirect(string $url): never { header('Location: '.$url,true,302); exit; }
-function saas_csrf(): string { if(empty($_SESSION['saas_csrf'])) $_SESSION['saas_csrf']=bin2hex(random_bytes(32)); return $_SESSION['saas_csrf']; }
-function saas_check_csrf(): void { $token=(string)($_POST['csrf']??''); if(!hash_equals((string)($_SESSION['saas_csrf']??''),$token)){http_response_code(419);exit('Invalid CSRF token');} }
+function saas_redirect(string $url): never { header('Location: '.$url,true,302);exit; }
+function saas_csrf(): string { if(empty($_SESSION['saas_csrf']))$_SESSION['saas_csrf']=bin2hex(random_bytes(32));return $_SESSION['saas_csrf']; }
+function saas_check_csrf(): void { $token=(string)($_POST['csrf']??'');if(!hash_equals((string)($_SESSION['saas_csrf']??''),$token)){http_response_code(419);exit('Invalid CSRF token');} }
 function saas_user_id(): int { return (int)($_SESSION['user_id']??0); }
 function saas_authenticated(): bool { return saas_user_id()>0; }
-function saas_require_login(): void { if(!saas_authenticated()) saas_redirect('saas_login.php'); }
-function saas_current_user(): array { static $user=null; if($user!==null)return $user; $id=saas_user_id(); if($id<=0)return $user=[]; $q=saas_db()->prepare("SELECT id,name,username,email,status,created_at FROM users WHERE id=? LIMIT 1");$q->execute([$id]);$user=$q->fetch()?:[];if(($user['status']??'')!=='ACTIVE'){saas_logout();return [];}return $user; }
-function saas_logout(): void { $_SESSION=[]; if(ini_get('session.use_cookies')){$p=session_get_cookie_params();setcookie(session_name(),'',time()-42000,$p['path'],$p['domain']??'',(bool)$p['secure'],(bool)$p['httponly']);}session_destroy(); }
+function saas_require_login(): void { if(!saas_authenticated())saas_redirect('saas_login.php'); }
+function saas_current_user(): array { static $user=null;if($user!==null)return $user;$id=saas_user_id();if($id<=0)return $user=[];$q=saas_db()->prepare("SELECT id,name,username,email,status,created_at FROM users WHERE id=? LIMIT 1");$q->execute([$id]);$user=$q->fetch()?:[];if(($user['status']??'')!=='ACTIVE'){saas_logout();return [];}return $user; }
+function saas_logout(): void { $_SESSION=[];if(ini_get('session.use_cookies')){$p=session_get_cookie_params();setcookie(session_name(),'',time()-42000,$p['path'],$p['domain']??'',(bool)$p['secure'],(bool)$p['httponly']);}session_destroy(); }
 function saas_current_organization_id(): int { return (int)($_SESSION['organization_id']??0); }
 function saas_current_tour_id(): int { return (int)($_SESSION['tour_id']??0); }
 function saas_set_context(int $organizationId,int $tourId=0): void { $_SESSION['organization_id']=$organizationId;$_SESSION['tour_id']=$tourId; }
@@ -70,3 +64,5 @@ function saas_can(string $permission): bool { $roles=['organization.manage'=>['O
 function saas_require_permission(string $permission): void { if(!saas_can($permission)){http_response_code(403);exit('403 Forbidden');} }
 function saas_audit(string $action,?string $entityType=null,?int $entityId=null,?string $details=null): void { try{$q=saas_db()->prepare("INSERT INTO audit_log(user_id,organization_id,tour_id,action,entity_type,entity_id,details,ip_address,user_agent) VALUES(?,?,?,?,?,?,?,?,?)");$q->execute([saas_user_id()?:null,saas_current_organization_id()?:null,saas_current_tour_id()?:null,$action,$entityType,$entityId,$details,$_SERVER['REMOTE_ADDR']??null,substr((string)($_SERVER['HTTP_USER_AGENT']??''),0,500)]);}catch(Throwable $e){error_log((string)$e);} }
 function saas_slug(string $value): string { $value=trim(strtolower($value));$value=preg_replace('/[^a-z0-9]+/','-',$value)??'';return trim($value,'-')?:'tour'; }
+
+require_once __DIR__ . '/saas_entitlements.php';
