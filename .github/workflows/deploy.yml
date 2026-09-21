@@ -109,7 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && php -r 'require \"bootstrap_saas.php\"; echo \"Application bootstrap OK\\n\";'"
+            "cd '$DEPLOY_PATH' && php -r 'require \"bootstrap.php\"; echo \"Application bootstrap OK\\n\";'"
 
       - name: Cleanup SSH credentials
         if: always()
