@@ -272,6 +272,18 @@ test_assert(
     'Dashboard Expenses link has a deployed target page'
 );
 
+$roomStatusMigration = file_text('database/migrations/019_normalize_room_status.sql');
+test_assert(
+    $roomStatusMigration !== '' &&
+    has_all($roomStatusMigration, [
+        'gotm_status_legacy',
+        "ENUM('AVAILABLE','BLOCKED')",
+        "'ACTIVE','AVAILABLE'",
+        "'INACTIVE','BLOCKED'",
+    ]),
+    'Legacy room status values are normalized safely before application writes'
+);
+
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
