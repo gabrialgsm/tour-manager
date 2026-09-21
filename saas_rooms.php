@@ -3,6 +3,7 @@ declare(strict_types=1);
 require __DIR__ . '/bootstrap_saas.php';
 saas_require_login();
 $tourId = saas_require_tour();
+$orgId = saas_current_organization_id();
 saas_require_permission('room.manage');
 $db = saas_db();
 $error = '';
@@ -18,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $capacity = max(1, min(20, (int)($_POST['capacity'] ?? 1)));
             $notes = trim((string)($_POST['notes'] ?? ''));
             if ($roomNo === '' || $type === '') throw new RuntimeException('Room number and room type are required.');
-            $q = $db->prepare('INSERT INTO rooms(tour_id,room_no,room_type,capacity,notes,status) VALUES(?,?,?,?,?,\'AVAILABLE\')');
-            $q->execute([$tourId,$roomNo,$type,$capacity,$notes ?: null]);
+            $q = $db->prepare('INSERT INTO rooms(organization_id,tour_id,room_no,room_type,capacity,notes,status) VALUES(?,?,?,?,?,?,\'AVAILABLE\')');
+            $q->execute([$orgId,$tourId,$roomNo,$type,$capacity,$notes ?: null]);
             saas_audit('room.created','room',(int)$db->lastInsertId(),json_encode(['room_no'=>$roomNo,'capacity'=>$capacity],JSON_UNESCAPED_UNICODE));
             $ok = 'Room created.';
         } elseif ($action === 'toggle_room') {
