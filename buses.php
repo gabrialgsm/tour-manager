@@ -15,15 +15,28 @@ $q->execute([$tourId,$name,$number?:null,$layout,$total,$rows,$front,$last]);
 $busId=(int)$db->lastInsertId();
 $seatTourColumn=(int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='seats' AND COLUMN_NAME='tour_id'")->fetchColumn()>0;
 $seatOrgColumn=(int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='seats' AND COLUMN_NAME='organization_id'")->fetchColumn()>0;
-if($seatTourColumn&&$seatOrgColumn){$q=$db->prepare('INSERT INTO seats(organization_id,tour_id,bus_id,seat_code,row_no,position,status) VALUES(?,?,?,?,?,?,\'AVAILABLE\')');}
-elseif($seatTourColumn){$q=$db->prepare('INSERT INTO seats(tour_id,bus_id,seat_code,row_no,position,status) VALUES(?,?,?,?,?,\'AVAILABLE\')');}
-elseif($seatOrgColumn){$q=$db->prepare('INSERT INTO seats(organization_id,bus_id,seat_code,row_no,position,status) VALUES(?,?,?,?,?,\'AVAILABLE\')');}
-else{$q=$db->prepare('INSERT INTO seats(bus_id,seat_code,row_no,position,status) VALUES(?,?,?,?,\'AVAILABLE\')');}
-$insertSeat=function(string $code,int $row,string $position)use($q,$seatOrgColumn,$seatTourColumn,$orgId,$tourId,$busId):void{
-if($seatOrgColumn&&$seatTourColumn)$q->execute([$orgId,$tourId,$busId,$code,$row,$position]);
-elseif($seatTourColumn)$q->execute([$tourId,$busId,$code,$row,$position]);
-elseif($seatOrgColumn)$q->execute([$orgId,$busId,$code,$row,$position]);
-else$q->execute([$busId,$code,$row,$position]);
+$seatCodeColumn=(int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='seats' AND COLUMN_NAME='seat_code'")->fetchColumn()>0;
+$seatNoColumn=(int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='seats' AND COLUMN_NAME='seat_no'")->fetchColumn()>0;
+
+$columns=[];$values=[];$types=[];
+if($seatOrgColumn){$columns[]='organization_id';}
+if($seatTourColumn){$columns[]='tour_id';}
+$columns[]='bus_id';
+if($seatCodeColumn){$columns[]='seat_code';}
+if($seatNoColumn){$columns[]='seat_no';}
+$columns[]='row_no';$columns[]='position';$columns[]='status';
+$placeholders=rtrim(str_repeat('?,',count($columns)),',');
+$q=$db->prepare('INSERT INTO seats('.implode(',',$columns).') VALUES('.$placeholders.')');
+
+$insertSeat=function(string $code,int $row,string $position)use($q,$columns,$seatOrgColumn,$seatTourColumn,$seatCodeColumn,$seatNoColumn,$orgId,$tourId,$busId):void{
+$params=[];
+if($seatOrgColumn)$params[]=$orgId;
+if($seatTourColumn)$params[]=$tourId;
+$params[]=$busId;
+if($seatCodeColumn)$params[]=$code;
+if($seatNoColumn)$params[]=$code;
+$params[]=$row;$params[]=$position;$params[]='AVAILABLE';
+$q->execute($params);
 };
 $n=0;
 for($i=1;$i<=$front;$i++){$n++;$insertSeat('S'.$i,0,'FRONT_SINGLE');}
