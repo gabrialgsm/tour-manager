@@ -88,16 +88,25 @@ UPDATE payments
 SET payment_reference = CONCAT('LEGACY-',id)
 WHERE payment_reference IS NULL OR TRIM(payment_reference) = '';
 
-UPDATE payments
-SET transaction_reference = NULLIF(TRIM(reference),'')
-WHERE transaction_reference IS NULL
-  AND EXISTS (
-    SELECT 1
-    FROM information_schema.COLUMNS c
-    WHERE c.TABLE_SCHEMA = DATABASE()
-      AND c.TABLE_NAME = 'payments'
-      AND c.COLUMN_NAME = 'reference'
-  );
+-- The original canonical schema called this field `reference`, while
+-- current production uses `transaction_reference`. Copy it only when that
+-- legacy column actually exists; SQL must not reference a missing column.
+SET @gotm_copy_payment_reference = (
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1
+      FROM information_schema.COLUMNS c
+      WHERE c.TABLE_SCHEMA = DATABASE()
+        AND c.TABLE_NAME = 'payments'
+        AND c.COLUMN_NAME = 'reference'
+    )
+    THEN 'UPDATE payments SET transaction_reference = NULLIF(TRIM(reference),'''') WHERE transaction_reference IS NULL'
+    ELSE 'SELECT 1'
+  END
+);
+PREPARE gotm_payment_reference_stmt FROM @gotm_copy_payment_reference;
+EXECUTE gotm_payment_reference_stmt;
+DEALLOCATE PREPARE gotm_payment_reference_stmt;
 
 ALTER TABLE payments
   MODIFY COLUMN payment_reference VARCHAR(50) NOT NULL;
