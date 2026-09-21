@@ -5,6 +5,8 @@ require __DIR__.'/bootstrap.php';
 saas_require_login();
 $tourId = saas_require_tour();
 $db = saas_db();
+$orgId = (int)saas_current_organization()['id'];
+$expenseOrgColumn = (int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='expenses' AND COLUMN_NAME='organization_id'")->fetchColumn() > 0;
 $error = '';
 $ok = '';
 
@@ -30,18 +32,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Invalid expense date.');
             }
 
-            $q = $db->prepare(
-                'INSERT INTO expenses(tour_id,category,description,amount,expense_date,created_by)
-                 VALUES(?,?,?,?,?,?)'
-            );
-            $q->execute([
-                $tourId,
-                $category,
-                $description !== '' ? $description : null,
-                $amount,
-                $date,
-                saas_user_id(),
-            ]);
+            if ($expenseOrgColumn) {
+                $q = $db->prepare(
+                    'INSERT INTO expenses(organization_id,tour_id,category,description,amount,expense_date,created_by)
+                     VALUES(?,?,?,?,?,?,?)'
+                );
+                $q->execute([
+                    $orgId,
+                    $tourId,
+                    $category,
+                    $description !== '' ? $description : null,
+                    $amount,
+                    $date,
+                    saas_user_id(),
+                ]);
+            } else {
+                $q = $db->prepare(
+                    'INSERT INTO expenses(tour_id,category,description,amount,expense_date,created_by)
+                     VALUES(?,?,?,?,?,?)'
+                );
+                $q->execute([
+                    $tourId,
+                    $category,
+                    $description !== '' ? $description : null,
+                    $amount,
+                    $date,
+                    saas_user_id(),
+                ]);
+            }
             $id = (int)$db->lastInsertId();
             saas_audit(
                 'expense.created',
