@@ -7,14 +7,23 @@ CONFIG_FILE="${ROOT_DIR}/config.php"
 BACKUP_ROOT="${BACKUP_ROOT:-${ROOT_DIR}/../backups/tour-manager}"
 RETENTION_DAYS="${RETENTION_DAYS:-14}"
 TIMESTAMP="$(date '+%Y%m%d_%H%M%S')"
-HOST="${DB_HOST:-}"
-USER="${DB_USER:-}"
-PASS="${DB_PASS:-}"
-NAME="${DB_NAME:-}"
+# Read database credentials directly from the application's config.php.
+# Do not export or print the password; pass it only to mysqldump via MYSQL_PWD.
+readarray -t DB_CONFIG < <(php -r '
+$c=require $argv[1];
+$d=$c["db"]??[];
+foreach (["host","user","pass","name"] as $k) {
+    $v=$d[$k]??"";
+    if (is_array($v) || is_object($v)) { $v=""; }
+    echo base64_encode((string)$v), "\\n";
+}
+' -- "$CONFIG_FILE")
 
-if [[ -f "$CONFIG_FILE" ]]; then
-  eval "$(php -r '$c=require $argv[1]; echo "DB_HOST=".escapeshellarg($c["db"]["host"]??"")."\\nDB_USER=".escapeshellarg($c["db"]["user"]??"")."\\nDB_PASS=".escapeshellarg($c["db"]["pass"]??"")."\\nDB_NAME=".escapeshellarg($c["db"]["name"]??"")."\\n";' -- "$CONFIG_FILE")"
-fi
+HOST="$(printf '%s' "${DB_CONFIG[0]:-}" | base64 -d 2>/dev/null || true)"
+USER="$(printf '%s' "${DB_CONFIG[1]:-}" | base64 -d 2>/dev/null || true)"
+PASS="$(printf '%s' "${DB_CONFIG[2]:-}" | base64 -d 2>/dev/null || true)"
+NAME="$(printf '%s' "${DB_CONFIG[3]:-}" | base64 -d 2>/dev/null || true)"
+unset DB_CONFIG
 
 : "${HOST:?DB host is required}"
 : "${USER:?DB user is required}"
