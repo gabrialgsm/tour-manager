@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 if(PHP_SAPI!=='cli'){http_response_code(403);exit("CLI only\n");}
-require __DIR__.'/../bootstrap_saas.php';
+require __DIR__.'/../bootstrap.php';
 
 $db=saas_db();
 $dir=realpath(__DIR__.'/../database/migrations');
