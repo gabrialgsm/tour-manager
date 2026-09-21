@@ -284,6 +284,17 @@ test_assert(
     'Legacy room status values are normalized safely before application writes'
 );
 
+$roomContextText = file_text('saas_rooms.php');
+test_assert(
+    $roomContextText !== '' &&
+    has_all($roomContextText, [
+        "isset(\$_POST['tour_id'])",
+        'saas_set_context($orgId, $postedTourId)',
+        'name="tour_id"',
+    ]),
+    'Room forms preserve and validate the active tour context across POST requests'
+);
+
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
