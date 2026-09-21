@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else {
                 if($count >= (int)$room['capacity']) throw new RuntimeException('Room '.$room['room_no'].' is full.');
                 $q=$db->prepare('DELETE FROM room_assignments WHERE tour_passenger_id=?');$q->execute([$passengerId]);
-                $q=$db->prepare('INSERT INTO room_assignments(tour_passenger_id,room_id,assigned_by) VALUES(?,?,?)');$q->execute([$passengerId,$roomId,saas_user_id()]);
+                $assignmentTourColumn=(int)$db->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='room_assignments' AND COLUMN_NAME='tour_id'")->fetchColumn()>0;if($assignmentTourColumn){$q=$db->prepare('INSERT INTO room_assignments(tour_id,tour_passenger_id,room_id,assigned_by) VALUES(?,?,?,?)');$q->execute([$tourId,$passengerId,$roomId,saas_user_id()]);}else{$q=$db->prepare('INSERT INTO room_assignments(tour_passenger_id,room_id,assigned_by) VALUES(?,?,?)');$q->execute([$passengerId,$roomId,saas_user_id()]);}
                 $db->commit(); saas_audit('room.assigned','tour_passenger',$passengerId,json_encode(['room_id'=>$roomId,'room_no'=>$room['room_no']],JSON_UNESCAPED_UNICODE)); $ok=$passenger['full_name'].' assigned to room '.$room['room_no'].'.';
             }
         } elseif ($action === 'unassign_room') {
