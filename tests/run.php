@@ -232,13 +232,18 @@ test_assert(
     $busText !== '' &&
     has_all($busText, [
         'INSERT INTO buses(tour_id,name,bus_number',
-        'INSERT INTO seats(bus_id,seat_code,row_no,position,status)',
+        '$seatOrgColumn',
+        '$seatTourColumn',
+        '$seatCodeColumn',
+        '$seatNoColumn',
+        "if($seatCodeColumn){$columns[]='seat_code';}",
+        "if($seatNoColumn){$columns[]='seat_no';}",
         'FRONT_SINGLE',
         "'LEFT'",
         "'RIGHT'",
         "'LAST'",
     ]),
-    'Bus/seat management writes the canonical production-compatible columns and positions'
+    'Bus/seat management writes canonical and legacy-compatible columns and positions'
 );
 
 $roomText = file_text('rooms.php');
