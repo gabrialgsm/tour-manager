@@ -209,6 +209,69 @@ test_assert(count($versions) === count(array_unique($versions)), 'Migration file
 test_assert(in_array('014_performance_indexes', $versions, true), 'Performance migration is present');
 test_assert(in_array('013_migration_tracking', $versions, true), 'Migration tracking is present');
 
+// Production schema-parity contracts. These mirror the migration/code fields that
+// previously caused live 500 errors on legacy installations.
+$parityMigration = file_text('database/migrations/018_schema_parity_legacy_installations.sql');
+test_assert(
+    $parityMigration !== '' &&
+    has_all($parityMigration, [
+        'organization_id',
+        'tour_id',
+        'bus_number',
+        'seat_code',
+        'payment_reference',
+        'transaction_reference',
+        'AVAILABLE',
+        'BLOCKED',
+    ]),
+    'Production schema parity migration covers rooms, buses, seats and payments'
+);
+
+$busText = file_text('saas_buses.php');
+test_assert(
+    $busText !== '' &&
+    has_all($busText, [
+        'INSERT INTO buses(tour_id,name,bus_number',
+        'INSERT INTO seats(bus_id,seat_code,row_no,position,status)',
+        'FRONT_SINGLE',
+        "'LEFT'",
+        "'RIGHT'",
+        "'LAST'",
+    ]),
+    'Bus/seat management writes the canonical production-compatible columns and positions'
+);
+
+$roomText = file_text('saas_rooms.php');
+test_assert(
+    $roomText !== '' &&
+    str_contains($roomText, 'INSERT INTO rooms(organization_id,tour_id,room_no,room_type,capacity,notes,status)'),
+    'Room creation writes the organization_id required by legacy production schema'
+);
+
+$paymentText = file_text('saas_payments.php');
+test_assert(
+    $paymentText !== '' &&
+    has_all($paymentText, [
+        'INSERT INTO payments(organization_id,tour_id,tour_passenger_id,payment_reference',
+        'transaction_reference',
+        'random_bytes(4)',
+    ]) &&
+    !str_contains($paymentText, 'INSERT INTO payments(tour_id,tour_passenger_id,amount,payment_method,reference'),
+    'Admin payment creation uses payment_reference/transaction_reference instead of the obsolete reference column'
+);
+
+$paymentIntentText = file_text('saas_payment_intents.php');
+test_assert(
+    $paymentIntentText !== '' &&
+    str_contains($paymentIntentText, 'INSERT INTO payments(organization_id,tour_id,tour_passenger_id,payment_reference'),
+    'Confirmed payment requests use the production payment columns'
+);
+
+test_assert(
+    file_text('saas_expenses.php') !== '',
+    'Dashboard Expenses link has a deployed target page'
+);
+
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
