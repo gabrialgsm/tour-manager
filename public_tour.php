@@ -3,7 +3,7 @@ declare(strict_types=1);
 require __DIR__.'/bootstrap.php';require_once __DIR__.'/feature_helpers.php';
 $db=saas_db();$slug=trim((string)($_GET['slug']??''));if($slug===''){http_response_code(404);exit('Tour not found.');}
 $q=$db->prepare("SELECT t.*,o.name organization_name,o.currency organization_currency,pp.status page_status,pp.theme_key,pp.title page_title,pp.subtitle,pp.cover_image,pp.logo_image,pp.primary_color,pp.secondary_color,pp.seo_title,pp.seo_description FROM tours t JOIN organizations o ON o.id=t.organization_id JOIN tour_public_pages pp ON pp.tour_id=t.id WHERE t.slug=? AND t.status IN ('DRAFT','ACTIVE','CLOSED') AND pp.status IN ('PUBLISHED','CLOSED') AND o.status='ACTIVE' LIMIT 1");$q->execute([$slug]);$tour=$q->fetch();if(!$tour){http_response_code(404);exit('Tour not found or registration is not public.');}
-$features=saas_enabled_features((int)$tour['id']);$closed=$tour['page_status']==='CLOSED'||$tour['status']==='CLOSED';$error='';$success='';$bookingLink='';
+$pageTitle=trim((string)($tour['page_title']??''));if($pageTitle==='')$pageTitle=trim((string)($tour['name']??'Tour'));$subtitle=trim((string)($tour['subtitle']??''));$fee=(float)($tour['default_fee']??0);$currency=trim((string)($tour['organization_currency']??'BDT'))?:'BDT';$description=trim((string)($tour['description']??''));$scheme=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')?'https':'http';$host=trim((string)($_SERVER['HTTP_X_FORWARDED_HOST']??$_SERVER['HTTP_HOST']??''));$publicUrl=$host!==''?$scheme.'://'.$host.'/tour/'.rawurlencode((string)$tour['slug']):'/tour/'.rawurlencode((string)$tour['slug']);$appBase=rtrim(dirname((string)($_SERVER['SCRIPT_NAME']??'/')),'/');$passengerAuthPath=($appBase?:'').'/passenger_auth.php';$publicBookingPath=($appBase?:'').'/public_booking.php';$features=saas_enabled_features((int)$tour['id']);$closed=$tour['page_status']==='CLOSED'||$tour['status']==='CLOSED';$error='';$success='';$bookingLink='';
 if($_SERVER['REQUEST_METHOD']==='POST'&&!$closed){
  try{
   saas_check_csrf();
@@ -19,7 +19,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&!$closed){
   $token=bin2hex(random_bytes(32));$tokenHash=hash('sha256',$token);
   if($existing){$q=$db->prepare("UPDATE tour_passengers SET status='PENDING',registration_source='PUBLIC',fee=?,discount=0,booking_access_token_hash=?,booking_access_token_created_at=NOW(),booking_access_token_revoked_at=NULL WHERE id=?");$q->execute([$fee,$tokenHash,(int)$existing['id']]);}
   else{$q=$db->prepare("INSERT INTO tour_passengers(tour_id,passenger_profile_id,status,registration_source,fee,discount,booking_access_token_hash,booking_access_token_created_at) VALUES(?,?, 'PENDING','PUBLIC',?,0,?,NOW())");$q->execute([(int)$tour['id'],$profileId,$fee,$tokenHash]);}
-  $db->commit();$base=rtrim(dirname((string)($_SERVER['SCRIPT_NAME']??'/')),'/');$bookingLink=$base.'/public_booking.php?slug='.rawurlencode((string)$tour['slug']).'&token='.rawurlencode($token);$success='Registration submitted successfully. Your booking is pending confirmation.';
+  $db->commit();$bookingLink=$publicBookingPath.'?slug='.rawurlencode((string)$tour['slug']).'&token='.rawurlencode($token);$success='Registration submitted successfully. Your booking is pending confirmation.';
  }catch(Throwable $e){if($db->inTransaction())$db->rollBack();$error=$e instanceof RuntimeException?$e->getMessage():'Could not complete registration. Please try again.';}
 }
 $theme=in_array((string)$tour['theme_key'],['classic','travel','event'],true)?(string)$tour['theme_key']:'classic';$primary=preg_match('/^#[0-9a-fA-F]{6}$/',(string)$tour['primary_color'])?$tour['primary_color']:'#155eef';$secondary=preg_match('/^#[0-9a-fA-F]{6}$/',(string)$tour['secondary_color'])?$tour['secondary_color']:'#0f172a';
@@ -65,7 +65,7 @@ h2{font-size:22px;line-height:1.2;margin:0}h3{margin:0 0 6px}.muted{color:var(--
 <body class="theme-<?=saas_h($theme)?>">
 <nav class="nav" aria-label="Tour navigation"><div class="container nav-inner">
  <div class="brand"><?php if($tour['logo_image']):?><img src="<?=saas_h($tour['logo_image'])?>" alt="<?=saas_h($tour['organization_name'])?> logo"><?php endif;?><span class="brand-name"><?=saas_h($tour['organization_name'])?></span></div>
- <div class="nav-links"><a class="nav-link" href="passenger_auth.php">Passenger Login</a><?php if(!$closed):?><a class="nav-cta" href="#register">Register</a><?php endif;?></div>
+ <div class="nav-links"><a class="nav-link" href="<?=saas_h($passengerAuthPath)?>">Passenger Login</a><?php if(!$closed):?><a class="nav-cta" href="#register">Register</a><?php endif;?></div>
 </div></nav>
 <header class="hero <?=($tour['cover_image']?'has-cover':'')?>"><div class="container hero-inner">
  <?php if($tour['logo_image']):?><img class="logo" src="<?=saas_h($tour['logo_image'])?>" alt="<?=saas_h($tour['organization_name'])?>"><?php endif;?>
