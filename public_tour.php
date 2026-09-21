@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';require_once __DIR__.'/saas_feature_helpers.php';
+require __DIR__.'/bootstrap.php';require_once __DIR__.'/feature_helpers.php';
 $db=saas_db();$slug=trim((string)($_GET['slug']??''));if($slug===''){http_response_code(404);exit('Tour not found.');}
 $q=$db->prepare("SELECT t.*,o.name organization_name,o.currency organization_currency,pp.status page_status,pp.theme_key,pp.title page_title,pp.subtitle,pp.cover_image,pp.logo_image,pp.primary_color,pp.secondary_color,pp.seo_title,pp.seo_description FROM tours t JOIN organizations o ON o.id=t.organization_id JOIN tour_public_pages pp ON pp.tour_id=t.id WHERE t.slug=? AND t.status IN ('DRAFT','ACTIVE','CLOSED') AND pp.status IN ('PUBLISHED','CLOSED') AND o.status='ACTIVE' LIMIT 1");$q->execute([$slug]);$tour=$q->fetch();if(!$tour){http_response_code(404);exit('Tour not found or registration is not public.');}
 $features=saas_enabled_features((int)$tour['id']);$closed=$tour['page_status']==='CLOSED'||$tour['status']==='CLOSED';$error='';$success='';$bookingLink='';

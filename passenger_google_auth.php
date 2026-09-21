@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/bootstrap.php';
 require __DIR__.'/passenger_auth_helpers.php';
 require __DIR__.'/passenger_auth_rate_limit.php';
 require __DIR__.'/passenger_google_token.php';

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/bootstrap.php';
 require __DIR__.'/passenger_auth_helpers.php';
 $db=saas_db();
 $slug=trim((string)($_GET['slug']??$_POST['slug']??''));

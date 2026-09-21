@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/bootstrap_saas.php';
+require __DIR__ . '/bootstrap.php';
 saas_require_login();
 
-if (saas_current_organization()) saas_redirect('saas_dashboard.php');
+if (saas_current_organization()) saas_redirect('dashboard.php');
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     saas_check_csrf();

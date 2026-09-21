@@ -78,7 +78,7 @@ foreach ($phpFiles as $path) {
 // Pure helper regression checks.
 // -------------------------------------------------------------------------
 $_SERVER['HTTPS'] = 'off';
-require_once $root . '/bootstrap_saas.php';
+require_once $root . '/bootstrap.php';
 
 test_assert(saas_slug('Sylhet Tour 2026!') === 'sylhet-tour-2026', 'slug helper normalizes public slugs');
 test_assert(saas_slug('  A__B  ') === 'a-b', 'slug helper collapses separators');
@@ -90,15 +90,15 @@ test_assert(saas_h('<script>alert(1)</script>') === '&lt;script&gt;alert(1)&lt;/
 // controls during future refactors even without a live database.
 // -------------------------------------------------------------------------
 $csrfFiles = [
-    'saas_booking_link.php',
-    'saas_passengers.php',
-    'saas_payments.php',
-    'saas_payment_intents.php',
-    'saas_registrations.php',
-    'saas_feature_options.php',
-    'saas_features.php',
-    'saas_public.php',
-    'saas_ticket_issue.php',
+    'booking_link.php',
+    'passengers.php',
+    'payments.php',
+    'payment_intents.php',
+    'registrations.php',
+    'feature_options.php',
+    'features.php',
+    'tour_settings.php',
+    'ticket_issue.php',
     'public_tour.php',
     'public_seat_select.php',
     'public_room_select.php',
@@ -111,14 +111,14 @@ foreach ($csrfFiles as $file) {
 }
 
 $permissionContracts = [
-    'saas_passengers.php' => 'passenger.create',
-    'saas_payments.php' => 'payment.create',
-    'saas_payment_intents.php' => 'payment.create',
-    'saas_registrations.php' => 'passenger.create',
-    'saas_features.php' => 'settings.manage',
-    'saas_feature_options.php' => 'settings.manage',
-    'saas_public.php' => 'tour.edit',
-    'saas_ticket_issue.php' => 'passenger.create',
+    'passengers.php' => 'passenger.create',
+    'payments.php' => 'payment.create',
+    'payment_intents.php' => 'payment.create',
+    'registrations.php' => 'passenger.create',
+    'features.php' => 'settings.manage',
+    'feature_options.php' => 'settings.manage',
+    'tour_settings.php' => 'tour.edit',
+    'ticket_issue.php' => 'passenger.create',
 ];
 foreach ($permissionContracts as $file => $permission) {
     $text = file_text($file);
@@ -126,7 +126,7 @@ foreach ($permissionContracts as $file => $permission) {
 }
 
 $securityContracts = [
-    'saas_booking_link.php' => ["hash('sha256'", 'random_bytes(32)', 'booking_access_token_hash'],
+    'booking_link.php' => ["hash('sha256'", 'random_bytes(32)', 'booking_access_token_hash'],
     'passenger_auth.php' => ['password_verify(', 'passenger_auth_rate_limited('],
     'passenger_google_auth.php' => ['random_bytes(32)', 'passenger_oauth_rate_limited(', 'hash_equals('],
     'passenger_facebook_auth.php' => ['random_bytes(32)', 'passenger_oauth_rate_limited(', 'hash_equals('],
@@ -135,8 +135,8 @@ $securityContracts = [
     'public_room_select.php' => ['FOR UPDATE', 'beginTransaction', 'commit'],
     'public_features.php' => ['FOR UPDATE', 'unit_price', 'total_price'],
     'public_checkout.php' => ['payment_intents', 'FOR UPDATE', 'feature_total'],
-    'saas_payment_intents.php' => ['FOR UPDATE', 'SUCCEEDED', 'saas_issue_ticket('],
-    'saas_ticket_service.php' => ['hash_hmac', 'qr_token_hash', 'forceReissue'],
+    'payment_intents.php' => ['FOR UPDATE', 'SUCCEEDED', 'saas_issue_ticket('],
+    'ticket_service.php' => ['hash_hmac', 'qr_token_hash', 'forceReissue'],
     'ticket_verify.php' => ['hash_equals(', 'hash_hmac', "['status']==='ISSUED'", 'voided_at'],
 ];
 foreach ($securityContracts as $file => $needles) {
@@ -154,7 +154,7 @@ test_assert(
 );
 
 // Cancellation must revoke booking access and release inventory.
-$registrationText = file_text('saas_registrations.php');
+$registrationText = file_text('registrations.php');
 test_assert(
     $registrationText !== '' &&
     has_all($registrationText, [
@@ -227,7 +227,7 @@ test_assert(
     'Production schema parity migration covers rooms, buses, seats and payments'
 );
 
-$busText = file_text('saas_buses.php');
+$busText = file_text('buses.php');
 test_assert(
     $busText !== '' &&
     has_all($busText, [
@@ -241,14 +241,14 @@ test_assert(
     'Bus/seat management writes the canonical production-compatible columns and positions'
 );
 
-$roomText = file_text('saas_rooms.php');
+$roomText = file_text('rooms.php');
 test_assert(
     $roomText !== '' &&
     str_contains($roomText, 'INSERT INTO rooms(organization_id,tour_id,room_no,room_type,capacity,notes,status)'),
     'Room creation writes the organization_id required by legacy production schema'
 );
 
-$paymentText = file_text('saas_payments.php');
+$paymentText = file_text('payments.php');
 test_assert(
     $paymentText !== '' &&
     has_all($paymentText, [
@@ -260,7 +260,7 @@ test_assert(
     'Admin payment creation uses payment_reference/transaction_reference instead of the obsolete reference column'
 );
 
-$paymentIntentText = file_text('saas_payment_intents.php');
+$paymentIntentText = file_text('payment_intents.php');
 test_assert(
     $paymentIntentText !== '' &&
     str_contains($paymentIntentText, 'INSERT INTO payments(organization_id,tour_id,tour_passenger_id,payment_reference'),
@@ -268,7 +268,7 @@ test_assert(
 );
 
 test_assert(
-    file_text('saas_expenses.php') !== '',
+    file_text('expenses.php') !== '',
     'Dashboard Expenses link has a deployed target page'
 );
 
@@ -284,7 +284,7 @@ test_assert(
     'Legacy room status values are normalized safely before application writes'
 );
 
-$roomContextText = file_text('saas_rooms.php');
+$roomContextText = file_text('rooms.php');
 test_assert(
     $roomContextText !== '' &&
     has_all($roomContextText, [
@@ -298,7 +298,7 @@ test_assert(
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
 
-$mailText = file_text('saas_mail.php');
+$mailText = file_text('mail.php');
 test_assert(
     $mailText !== '' &&
     has_all($mailText, ['stream_socket_client', 'stream_socket_enable_crypto', 'AUTH PLAIN', 'AUTH LOGIN']),
@@ -307,7 +307,7 @@ test_assert(
 $resetText = file_text('passenger_password_reset.php');
 test_assert(
     $resetText !== '' &&
-    str_contains($resetText, "require __DIR__.'/saas_mail.php';") &&
+    str_contains($resetText, "require __DIR__.'/mail.php';") &&
     str_contains($resetText, 'saas_send_email(') &&
     !str_contains($resetText, '$resetUrl</div>') &&
     !str_contains($resetText, 'Email delivery is not configured yet'),
@@ -321,28 +321,28 @@ test_assert(
  // -------------------------------------------------------------------------
  $billingSchema=file_text('database/migrations/015_saas_billing_entitlements.sql');
  test_assert($billingSchema!=='' && has_all($billingSchema,['saas_plans','saas_plan_entitlements','organization_subscriptions','billing_invoices','billing_events','uq_org_subscription']), 'SaaS billing schema has plans, entitlements, subscriptions, invoices and idempotent events');
- $entText=file_text('saas_entitlements.php');
+ $entText=file_text('entitlements.php');
  test_assert($entText!=='' && has_all($entText,['saas_entitlement(','saas_has_entitlement(','saas_require_entitlement(','saas_require_limit(','saas_billing_usage']), 'Central entitlement service exposes plan checks and usage limits');
- $billingText=file_text('saas_billing.php');
+ $billingText=file_text('billing.php');
  test_assert($billingText!=='' && has_all($billingText,['organization.manage','saas_plan(','saas_entitlement(','billing_events','saas_check_csrf()']), 'Billing UI is organization-admin protected, CSRF guarded and audit/event ready');
  $tourCreateText=file_text('tour_create.php');
  test_assert($tourCreateText!=='' && str_contains($tourCreateText, 'saas_require_limit($orgId,\'max_tours\''), 'Tour creation enforces centralized max_tours entitlement');
- $featureSettingsText=file_text('saas_features.php');
+ $featureSettingsText=file_text('features.php');
  test_assert($featureSettingsText!=='' && str_contains($featureSettingsText, 'saas_require_entitlement($orgId,\'custom_features\''), 'Custom tour features enforce centralized entitlement');
- $publicText=file_text('saas_public.php');
+ $publicText=file_text('tour_settings.php');
  test_assert($publicText!=='' && str_contains($publicText, 'saas_has_entitlement($orgId,\'custom_branding\')'), 'Custom public-page branding enforces centralized entitlement');
  
 // -------------------------------------------------------------------------
 // Organization / team management contracts.
 // -------------------------------------------------------------------------
 
-$teamText = file_text('saas_team.php');
+$teamText = file_text('team.php');
 test_assert(
     $teamText !== '' &&
     has_all($teamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'organization_members', 'FOR UPDATE', 'organization.owner_transferred']),
     'Organization team management has permission, CSRF, scoped locking and ownership-transfer controls'
 );
-$tourTeamText = file_text('saas_tour_team.php');
+$tourTeamText = file_text('tour_team.php');
 test_assert(
     $tourTeamText !== '' &&
     has_all($tourTeamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'tour_members', 'organization_id', 'FOR UPDATE']),

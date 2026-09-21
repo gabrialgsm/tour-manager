@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/bootstrap.php';
 require __DIR__.'/passenger_auth_rate_limit.php';
-if (saas_authenticated()) saas_redirect('saas_dashboard.php');
+if (saas_authenticated()) saas_redirect('dashboard.php');
 $error='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
     try{
@@ -31,4 +31,4 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         saas_redirect('organization_create.php');
     }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();$error=$e->getMessage();}
 }
-?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GoTM — Start free</title><link rel="stylesheet" href="assets/app.css"></head><body class="login-page"><div class="login-card"><div class="brand">GoTM — GoZyraa Tour Management</div><h1>Start free</h1><p class="muted">Create your GoTM account and set up your first organization.</p><?php if($error):?><div class="alert danger"><?=saas_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><label>Your name<input name="name" required maxlength="180" autocomplete="name"></label><label>Username<input name="username" required maxlength="80" autocomplete="username"></label><label>Email <span class="muted">(recommended)</span><input type="email" name="email" maxlength="190" autocomplete="email"></label><label>Password<input type="password" name="password" minlength="10" required autocomplete="new-password"></label><button class="btn primary wide" type="submit">Create free account</button></form><p class="hint">Already have an account? <a href="saas_login.php">Sign in</a></p></div></body></html>
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GoTM — Start free</title><link rel="stylesheet" href="assets/app.css"></head><body class="login-page"><div class="login-card"><div class="brand">GoTM — GoZyraa Tour Management</div><h1>Start free</h1><p class="muted">Create your GoTM account and set up your first organization.</p><?php if($error):?><div class="alert danger"><?=saas_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><label>Your name<input name="name" required maxlength="180" autocomplete="name"></label><label>Username<input name="username" required maxlength="80" autocomplete="username"></label><label>Email <span class="muted">(recommended)</span><input type="email" name="email" maxlength="190" autocomplete="email"></label><label>Password<input type="password" name="password" minlength="10" required autocomplete="new-password"></label><button class="btn primary wide" type="submit">Create free account</button></form><p class="hint">Already have an account? <a href="login.php">Sign in</a></p></div></body></html>

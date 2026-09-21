@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__.'/bootstrap_saas.php';
+require_once __DIR__.'/bootstrap.php';
 
 function saas_feature_catalog(): array {
     return [

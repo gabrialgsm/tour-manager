@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__.'/bootstrap_saas.php';
+require_once __DIR__.'/bootstrap.php';
 
 const PASSENGER_AUTH_RATE_WINDOW = 900;
 const PASSENGER_AUTH_IP_LIMIT = 20;

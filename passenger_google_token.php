@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__.'/bootstrap_saas.php';
+require_once __DIR__.'/bootstrap.php';
 function passenger_google_http_json(string $url):array{$ch=curl_init($url);curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>10,CURLOPT_HTTPHEADER=>['Accept: application/json']]);$body=curl_exec($ch);$status=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE);curl_close($ch);if($body===false||$status<200||$status>=300)throw new RuntimeException('Google identity verification service is unavailable.');$data=json_decode((string)$body,true);if(!is_array($data))throw new RuntimeException('Invalid Google identity response.');return $data;}
 function passenger_google_b64url(string $v):string{$v=strtr($v,'-_','+/');return base64_decode($v.str_repeat('=',(4-strlen($v)%4)%4),true)?:'';}
 function passenger_google_der_len(int $n):string{if($n<128)return chr($n);$out='';while($n>0){$out=chr($n&255).$out;$n>>=8;}return chr(128|strlen($out)).$out;}

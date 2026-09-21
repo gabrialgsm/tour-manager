@@ -42,7 +42,7 @@ The `saas-rebuild` branch runs automated regression tests through GitHub Actions
 
 ## Production Email
 
-Transactional passenger email is handled through the dependency-free SMTP helper `saas_mail.php`.
+Transactional passenger email is handled through the dependency-free SMTP helper `mail.php`.
 
 Configure the `mail` section in the production-only `config.php` (never commit SMTP credentials):
 

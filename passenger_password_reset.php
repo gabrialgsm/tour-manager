@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/bootstrap.php';
 require __DIR__.'/passenger_auth_helpers.php';
 require __DIR__.'/passenger_auth_rate_limit.php';
-require __DIR__.'/saas_mail.php';
+require __DIR__.'/mail.php';
 
 $db=saas_db();
 $token=trim((string)($_GET['token']??$_POST['token']??''));

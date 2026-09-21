@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
-if (saas_authenticated()) saas_redirect('saas_dashboard.php');
+require __DIR__.'/bootstrap.php';
+if (saas_authenticated()) saas_redirect('dashboard.php');
 $count=(int)saas_db()->query("SELECT COUNT(*) FROM users")->fetchColumn();
-if($count>0) saas_redirect('saas_login.php');
+if($count>0) saas_redirect('login.php');
 $error='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
  saas_check_csrf();

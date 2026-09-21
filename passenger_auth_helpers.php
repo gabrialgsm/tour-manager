@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__.'/bootstrap_saas.php';
+require_once __DIR__.'/bootstrap.php';
 
 const PASSENGER_SESSION_TTL = 2592000; // 30 days absolute lifetime.
 const PASSENGER_SESSION_IDLE = 43200;  // 12 hours inactivity timeout.

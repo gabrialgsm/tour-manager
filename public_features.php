@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/bootstrap_saas.php';
+require __DIR__.'/bootstrap.php';
 require_once __DIR__.'/passenger_auth_helpers.php';
-require_once __DIR__.'/saas_feature_helpers.php';
+require_once __DIR__.'/feature_helpers.php';
 $db=saas_db();$slug=trim((string)($_GET['slug']??''));$token=trim((string)($_GET['token']??''));$tourId=(int)($_GET['tour_id']??0);$accountMode=isset($_GET['account']);$booking=null;
 if($accountMode&&passenger_authenticated()){$booking=passenger_booking($tourId);}
 elseif($slug!==''&&preg_match('/^[a-f0-9]{64}$/',$token)){$q=$db->prepare("SELECT tp.id tp_id,tp.status,tp.fee,tp.discount,pp.id passenger_profile_id,pp.full_name,pp.phone,pp.email,t.id tour_id,t.organization_id,t.name tour_name,t.slug,o.currency,o.name organization_name FROM tour_passengers tp JOIN passenger_profiles pp ON pp.id=tp.passenger_profile_id JOIN tours t ON t.id=tp.tour_id JOIN organizations o ON o.id=t.organization_id WHERE t.slug=? AND tp.booking_access_token_hash=? AND tp.booking_access_token_revoked_at IS NULL AND o.status='ACTIVE' LIMIT 1");$q->execute([$slug,hash('sha256',$token)]);$booking=$q->fetch();if(!$booking||$booking['status']!=='ACTIVE'){http_response_code(404);exit('Active booking not found.');}}

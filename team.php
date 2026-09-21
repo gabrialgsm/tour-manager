@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/bootstrap_saas.php';
+require __DIR__ . '/bootstrap.php';
 saas_require_login();
 $orgId = saas_require_organization();
 saas_require_permission('member.manage');
@@ -133,7 +133,7 @@ $org = saas_current_organization();
 ?><!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Team — <?=saas_h($org['name']??'GoTM')?></title><link rel="stylesheet" href="assets/app.css">
 <style>.team-wrap{max-width:1180px;margin:auto;padding:24px 16px 70px}.team-hero{display:flex;justify-content:space-between;gap:18px;align-items:end;flex-wrap:wrap;margin-bottom:18px}.team-hero h1{font-size:30px}.team-grid{display:grid;grid-template-columns:360px 1fr;gap:18px}.panel{background:#fff;border:1px solid var(--gm-line,#e1eee6);border-radius:18px;padding:18px;box-shadow:var(--gm-shadow,0 12px 35px rgba(20,92,50,.08))}.member{border:1px solid #e5ece8;border-radius:14px;padding:14px;margin:10px 0}.member-head{display:flex;justify-content:space-between;gap:10px;align-items:start}.member-name{font-weight:900}.meta{font-size:12px;color:#718096;margin-top:3px}.member-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.member-actions .full{grid-column:1/-1}.role-owner{background:#fff8e8;color:#9a6500}.role-admin{background:#eef6ff;color:#1d4ed8}.role-manager{background:#f0fdf4;color:#15803d}.role-staff{background:#f3f4f6;color:#374151}.status-off{opacity:.62}.danger-link{background:#fff0f2;color:#b4233a}.transfer{margin-top:18px;padding-top:16px;border-top:1px solid #e5ece8}@media(max-width:900px){.team-grid{grid-template-columns:1fr}}</style></head>
-<body><header class="topbar"><div><div class="eyebrow">GoTM — Organization</div><h1><?=saas_h($org['name']??'Organization')?></h1><div class="sub">Team & access management</div></div><div class="nav-actions"><a class="btn ghost" href="saas_dashboard.php">Dashboard</a><a class="btn ghost" href="saas_logout.php">Logout</a></div></header>
+<body><header class="topbar"><div><div class="eyebrow">GoTM — Organization</div><h1><?=saas_h($org['name']??'Organization')?></h1><div class="sub">Team & access management</div></div><div class="nav-actions"><a class="btn ghost" href="dashboard.php">Dashboard</a><a class="btn ghost" href="saas_logout.php">Logout</a></div></header>
 <main class="team-wrap"><div class="team-hero"><div><h1>Team management</h1><p class="muted">Add existing GoTM users, control organization roles, and manage access safely.</p></div><span class="badge"><?=count($members)?> members</span></div>
 <?php if($ok):?><div class="alert"><?=saas_h($ok)?></div><?php endif;?><?php if($error):?><div class="alert danger"><?=saas_h($error)?></div><?php endif;?>
 <div class="team-grid"><section class="panel"><h2>Add team member</h2><p class="muted">The person must already have a GoTM account. Use their username or email.</p><form method="post"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="action" value="add"><label>Username or email<input name="identity" required autocomplete="off"></label><label>Organization role<select name="role"><option>STAFF</option><option>MANAGER</option><option>ADMIN</option></select></label><button class="btn primary wide" type="submit">Add to organization</button></form>

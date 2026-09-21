@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/bootstrap_saas.php';
+require_once __DIR__.'/bootstrap.php';
 $tourId=saas_require_tour();saas_require_permission('bus.manage');$db=saas_db();$error='';$ok='';
 if($_SERVER['REQUEST_METHOD']==='POST'){saas_check_csrf();try{if(($_POST['action']??'')==='create_bus'){
 $name=trim((string)($_POST['name']??''));$number=trim((string)($_POST['bus_number']??''));$layout=(string)($_POST['layout_type']??'2+2');$rows=max(1,(int)($_POST['normal_rows']??0));$front=max(0,(int)($_POST['front_single_count']??0));$last=max(1,(int)($_POST['last_row_seats']??0));$per=['1+2'=>3,'2+1'=>3,'2+2'=>4,'2+3'=>5,'LEGACY5'=>5][$layout]??4;if($name==='')throw new RuntimeException('Bus name is required.');
