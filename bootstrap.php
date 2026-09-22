@@ -66,3 +66,18 @@ function saas_audit(string $action,?string $entityType=null,?int $entityId=null,
 function saas_slug(string $value): string { $value=trim(strtolower($value));$value=preg_replace('/[^a-z0-9]+/','-',$value)??'';return trim($value,'-')?:'tour'; }
 
 require_once __DIR__ . '/entitlements.php';
+
+
+/* Shared internal GoTM workspace shell is injected for authenticated HTML pages. */
+if (saas_authenticated() && !defined('GOTM_SHELL_BUFFER')) {
+    define('GOTM_SHELL_BUFFER', true);
+    $gotmScript = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+    $gotmSkipShell = in_array($gotmScript, ['index.php','login.php','signup.php','logout.php','public_tour.php','public_booking.php','public_checkout.php','public_features.php','public_room_select.php','public_seat_select.php','passenger_dashboard.php','passenger_register.php','passenger_auth.php','passenger_password_reset.php','ticket_verify.php','qr.php','qr_image.php','api.php'], true) || str_starts_with($gotmScript, 'passenger_');
+    if (!$gotmSkipShell) {
+        ob_start(static function (string $html): string {
+            if (stripos($html, '</body>') === false || stripos($html, 'text/html') === false && stripos($html, '<!doctype') === false && stripos($html, '<html') === false) return $html;
+            if (stripos($html, 'assets/app-shell.js') !== false || stripos($html, 'class="gm-shell"') !== false) return $html;
+            return str_ireplace('</body>', '<script src="/assets/app-shell.js?v=1"></script></body>', $html);
+        });
+    }
+}
