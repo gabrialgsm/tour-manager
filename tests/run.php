@@ -451,6 +451,8 @@ if ($failures) {
 }
 
 echo "All automated tests passed.\n";
+$toursText=file_text('tours.php');
+test_assert($toursText!=='' && has_all($toursText,['gotm-logo.png','settingsBtn','settingsMenu','tour_edit.php','public_urls.php','billing.php','team.php','account_settings.php','logout.php']),'Tours page uses the GoTM sidebar and settings menu');
 $settingsText=file_text('settings.php');
 test_assert($settingsText!=='' && has_all($settingsText,['saas_require_login','saas_require_permission','tour_edit.php']),'Settings entry uses the current SaaS auth and tour settings flow');
 $shellText=file_text('assets/app-shell.js');
