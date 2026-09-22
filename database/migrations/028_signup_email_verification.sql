@@ -1,0 +1,15 @@
+ALTER TABLE users
+  MODIFY COLUMN status ENUM('ACTIVE','INACTIVE','SUSPENDED','PENDING') NOT NULL DEFAULT 'ACTIVE';
+
+CREATE TABLE IF NOT EXISTS signup_email_verifications (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+ user_id BIGINT UNSIGNED NOT NULL,
+ token_hash CHAR(64) NOT NULL,
+ expires_at DATETIME NOT NULL,
+ used_at DATETIME NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY(id),
+ UNIQUE KEY uq_signup_verify_token(token_hash),
+ KEY idx_signup_verify_user(user_id),
+ CONSTRAINT fk_signup_verify_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
