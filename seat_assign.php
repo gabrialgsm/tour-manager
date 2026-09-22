@@ -6,7 +6,7 @@ try{
   saas_require_permission('bus.manage');
   if($_SERVER['REQUEST_METHOD']!=='POST')throw new RuntimeException('POST required.');
   saas_check_csrf();
-  $passengerId=(int)($_POST['tour_passenger_id']??0);$busId=(int)($_POST['bus_id']??0);$seatId=(int)($_POST['seat_id']??0);$swap=((string)($_POST['swap']??'')==='1');$sourceSeatId=(int)($_POST['source_seat_id']??0);$targetSeatId=(int)($_POST['target_seat_id']??0);
+  $passengerId=(int)($_POST['tour_passenger_id']??0);$busId=(int)($_POST['bus_id']??0);$seatId=(int)($_POST['seat_id']??0);$sourceSeatId=(int)($_POST['source_seat_id']??0);$targetSeatId=(int)($_POST['target_seat_id']??0);$swap=((string)($_POST['swap']??'')==='1')||($sourceSeatId>0&&$targetSeatId>0&&$sourceSeatId!==$targetSeatId);
   if($swap){
     if(!$sourceSeatId||!$targetSeatId||$sourceSeatId===$targetSeatId)throw new RuntimeException('Two different seats are required for a seat change.');
   }elseif(!$passengerId||!$busId||!$seatId){
