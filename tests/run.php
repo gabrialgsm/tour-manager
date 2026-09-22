@@ -432,7 +432,7 @@ test_assert($createText!=='' && has_all($createText,['default_transport','banner
 $featuresText=file_text('features.php');
 test_assert(
     $featuresText!=='' &&
-    has_all($featuresText,['add_custom','toggle_custom','delete_custom','custom_label','custom_description','Enable','Disable','My custom features']),
+    has_all($featuresText,['add_custom','update_custom','delete_custom','custom_label','custom_description','name="enabled"','Save','My custom features']),
     'Tour features supports unlimited custom features with independent enable and disable controls'
 );
 $featureHelperText=file_text('feature_helpers.php');
