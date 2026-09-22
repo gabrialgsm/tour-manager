@@ -15,7 +15,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         saas_check_csrf();
         $action = (string)($_POST['action'] ?? '');
 
-        if ($action === 'create_expense') {
+        if ($action === 'update_expense') {
+            saas_require_permission('expense.edit');
+            $id = (int)($_POST['expense_id'] ?? 0);
+            $category = trim((string)($_POST['category'] ?? ''));
+            $description = trim((string)($_POST['description'] ?? ''));
+            $amount = round((float)($_POST['amount'] ?? 0), 2);
+            $date = trim((string)($_POST['expense_date'] ?? ''));
+
+            if ($id <= 0) throw new RuntimeException('Expense not found.');
+            if ($category === '') throw new RuntimeException('Expense category is required.');
+            if ($amount <= 0) throw new RuntimeException('Expense amount must be greater than zero.');
+            if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date)) throw new RuntimeException('Invalid expense date.');
+
+            $db->beginTransaction();
+            $q = $db->prepare('SELECT id,category,description,amount,expense_date FROM expenses WHERE id=? AND tour_id=? FOR UPDATE');
+            $q->execute([$id, $tourId]);
+            $old = $q->fetch();
+            if (!$old) throw new RuntimeException('Expense not found for this tour.');
+
+            if ($expenseOrgColumn) {
+                $q = $db->prepare('UPDATE expenses SET organization_id=?,category=?,description=?,amount=?,expense_date=? WHERE id=? AND tour_id=?');
+                $q->execute([$orgId,$category,$description !== '' ? $description : null,$amount,$date,$id,$tourId]);
+            } else {
+                $q = $db->prepare('UPDATE expenses SET category=?,description=?,amount=?,expense_date=? WHERE id=? AND tour_id=?');
+                $q->execute([$category,$description !== '' ? $description : null,$amount,$date,$id,$tourId]);
+            }
+            $db->commit();
+            saas_audit('expense.updated','expense',$id,json_encode([
+                'before'=>['category'=>$old['category'],'amount'=>(float)$old['amount'],'expense_date'=>$old['expense_date']],
+                'after'=>['category'=>$category,'amount'=>$amount,'expense_date'=>$date]
+            ],JSON_UNESCAPED_UNICODE));
+            $ok = 'Expense updated successfully.';
+        } elseif ($action === 'create_expense') {
             saas_require_permission('expense.create');
             $category = trim((string)($_POST['category'] ?? ''));
             $description = trim((string)($_POST['description'] ?? ''));
@@ -142,7 +174,7 @@ label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
 input,textarea,button{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;font:inherit}
 textarea{min-height:80px;resize:vertical}
 button{margin-top:12px;background:#172033;color:#fff;border-color:#172033;cursor:pointer;font-weight:700}
-.danger{background:#fff;color:#b42318;border-color:#fecdca;margin:0;width:auto;padding:7px 10px}
+.danger{background:#fff;color:#b42318;border-color:#fecdca;margin:0;width:auto;padding:7px 10px}.edit-btn{background:#eef4ff;color:#155eef;border-color:#c7d7fe;margin:0;width:auto;padding:7px 10px}.action-row{display:flex;gap:7px;flex-wrap:wrap}.modal{position:fixed;inset:0;background:#0b1f3388;display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal.open{display:flex}.modal-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px #0003}.modal-actions{display:flex;gap:10px}.modal-actions button{margin:0}.modal-actions .cancel{background:#fff;color:#172033;border-color:#d0d5dd}
 .msg{padding:11px;border-radius:9px;margin-bottom:15px}
 .ok{background:#ecfdf3;color:#067647}
 .err{background:#fef3f2;color:#b42318}
@@ -200,6 +232,8 @@ th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;vertical-align:t
 <td><strong><?=number_format((float)$expense['amount'],2)?></strong></td>
 <td><?=saas_h($expense['created_by_name'] ?? 'System')?></td>
 <td>
+<div class="action-row">
+<?php if(saas_can('expense.edit')):?><button type="button" class="edit-btn" data-edit-expense='<?=saas_h(json_encode(['id'=>(int)$expense['id'],'category'=>(string)$expense['category'],'description'=>(string)($expense['description']??''),'amount'=>(string)$expense['amount'],'date'=>(string)$expense['expense_date']],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES))?>'>Edit</button><?php endif;?>
 <?php if(saas_can('expense.delete')):?>
 <form method="post" onsubmit="return confirm('Delete this expense?')">
 <input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>">
@@ -207,7 +241,9 @@ th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;vertical-align:t
 <input type="hidden" name="expense_id" value="<?=$expense['id']?>">
 <button class="danger">Delete</button>
 </form>
-<?php else:?>—<?php endif;?>
+<?php endif;?>
+<?php if(!saas_can('expense.edit')&&!saas_can('expense.delete')):?>—<?php endif;?>
+</div>
 </td>
 </tr>
 <?php endforeach;?>
@@ -217,5 +253,41 @@ th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;vertical-align:t
 </section>
 </div>
 </main>
+<div class="modal" id="expenseEditModal" aria-hidden="true">
+  <div class="modal-card">
+    <h2 style="margin-top:0">Edit expense</h2>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>">
+      <input type="hidden" name="action" value="update_expense">
+      <input type="hidden" name="expense_id" id="editExpenseId">
+      <label>Category</label><input name="category" id="editExpenseCategory" required>
+      <label>Description</label><textarea name="description" id="editExpenseDescription"></textarea>
+      <label>Amount</label><input type="number" name="amount" id="editExpenseAmount" min="0.01" step="0.01" required>
+      <label>Date</label><input type="date" name="expense_date" id="editExpenseDate" required>
+      <div class="modal-actions"><button type="submit">Save changes</button><button type="button" class="cancel" id="closeExpenseEdit">Cancel</button></div>
+    </form>
+  </div>
+</div>
+<script>
+(function(){
+ const modal=document.getElementById('expenseEditModal');
+ const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true')};
+ document.querySelectorAll('[data-edit-expense]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+   const d=JSON.parse(btn.dataset.editExpense);
+   document.getElementById('editExpenseId').value=d.id;
+   document.getElementById('editExpenseCategory').value=d.category||'';
+   document.getElementById('editExpenseDescription').value=d.description||'';
+   document.getElementById('editExpenseAmount').value=d.amount||'';
+   document.getElementById('editExpenseDate').value=d.date||'';
+   modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+   document.getElementById('editExpenseCategory').focus();
+  });
+ });
+ document.getElementById('closeExpenseEdit').addEventListener('click',close);
+ modal.addEventListener('click',e=>{if(e.target===modal)close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+})();
+</script>
 </body>
 </html>
