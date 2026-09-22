@@ -8,7 +8,7 @@ function upload_tour_image(string $field,int $tourId,string $kind): string {
  $info=@getimagesize((string)$f['tmp_name']); if(!$info) throw new RuntimeException('The '.$kind.' file is not a valid image.');
  $mime=(string)($info['mime']??''); $allowed=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp']; if(!isset($allowed[$mime])) throw new RuntimeException('The '.$kind.' must be JPG, PNG or WebP.');
  $minW=$kind==='cover'?1200:200; $minH=$kind==='cover'?450:60; if((int)$info[0]<$minW||(int)$info[1]<$minH) throw new RuntimeException(ucfirst($kind).' image must be at least '.$minW.' × '.$minH.' px.');
- $dir=__DIR__.'/uploads/tours/'.$tourId; if(!is_dir($dir)&&!mkdir($dir,0755,true)&&!is_dir($dir)) throw new RuntimeException('Could not create the image upload directory.');
+ $baseDir=__DIR__.'/uploads/tours'; $dir=$baseDir.'/'.$tourId; if(!is_dir($baseDir) && !@mkdir($baseDir,0775,true) && !is_dir($baseDir)) throw new RuntimeException('Image upload base directory is not writable: '.saas_h($baseDir)); if(!is_dir($dir) && !@mkdir($dir,0775,true) && !is_dir($dir)){ $parent=is_dir($baseDir)?$baseDir:dirname($baseDir); throw new RuntimeException('Could not create image upload directory. Path: '.$dir.' | Parent writable: '.(is_writable($parent)?'YES':'NO').' | Base writable: '.(is_writable($baseDir)?'YES':'NO')); } if(!is_writable($dir)) throw new RuntimeException('Image upload directory is not writable: '.$dir);
  $name=$kind.'-'.bin2hex(random_bytes(8)).'.'.$allowed[$mime]; if(!move_uploaded_file((string)$f['tmp_name'],$dir.'/'.$name)) throw new RuntimeException('Could not save the '.$kind.' image.');
  return '/uploads/tours/'.$tourId.'/'.$name;
 }
