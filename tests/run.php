@@ -410,7 +410,11 @@ test_assert($hubText!=='' && has_all($hubText,['Current plan','Registered tours'
 $createText=file_text('tour_create.php');
 test_assert($createText!=='' && has_all($createText,['default_transport','banner_image','tour_settings','tour.created']),'Tour creation stores default transport and dashboard banner settings');
 $dashText=file_text('dashboard.php');
-test_assert($dashText!=='' && has_all($dashText,['Tour note','Schedule','Transport','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php']),'Tour dashboard exposes operational cards and management panels');
+test_assert(
+    $dashText!=='' &&
+    has_all($dashText,['Tour note','Schedule','Bus seat plan','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php','seat_plan.php','data-bus-tab','settingsBtn']),
+    'Tour dashboard exposes operational cards, default bus seat plan and settings navigation'
+);
 $openText=file_text('tour_open.php');
 test_assert($openText!=='' && has_all($openText,['tour_members','saas_set_context','dashboard.php']),'Tour opening is scoped to an organization member before changing context');
 $accountText=file_text('account_settings.php');
