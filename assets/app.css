@@ -281,3 +281,10 @@ body.gm-app-body{font-family:"Inter","Segoe UI",Arial,sans-serif!important;backg
 
 /* GoTM shell stability */
 .gm-sidebar{overflow:hidden!important}.gm-nav{min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding-right:2px}.gm-nav a{flex:0 0 auto}.gm-side-bottom{flex:0 0 auto;background:linear-gradient(180deg,#082b4b 0%,#082a48 100%)}
+
+/* Shared sidebar settings dropdown */
+.gm-settings-wrap{position:relative;display:block}
+.gm-settings-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#c8d9e7;font:700 13px Inter,system-ui,sans-serif;text-align:left;cursor:pointer}
+.gm-settings-btn span{width:20px;text-align:center;color:#8eb2cb}.gm-settings-btn b{flex:1}.gm-settings-btn i{font-style:normal;font-size:11px;transition:transform .15s}.gm-settings-wrap.open .gm-settings-btn,.gm-settings-btn:hover{background:rgba(255,255,255,.1);color:#fff}.gm-settings-wrap.open .gm-settings-btn i{transform:rotate(180deg)}
+.gm-settings-menu{display:none;position:absolute;left:8px;right:8px;bottom:calc(100% + 7px);padding:6px;background:#fff;border:1px solid #dfe7ee;border-radius:11px;box-shadow:0 14px 35px rgba(8,43,75,.22);z-index:300}
+.gm-settings-wrap.open .gm-settings-menu{display:grid;gap:2px}.gm-settings-menu a{display:block;padding:9px 10px;border-radius:7px;color:#344054!important;font-size:12px;font-weight:700}.gm-settings-menu a:hover{background:#eef6ff;color:#155eef!important}
