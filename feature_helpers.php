@@ -18,7 +18,7 @@ function saas_feature(int $tourId,string $key): array {
 function saas_enabled_features(int $tourId): array {
     $q=saas_db()->prepare('SELECT * FROM tour_features WHERE tour_id=? AND enabled=1 ORDER BY id');
     $q->execute([$tourId]);$rows=$q->fetchAll();$catalog=saas_feature_catalog();
-    foreach($rows as &$r){$c=$catalog[$r['feature_key']]??['label'=>$r['feature_key'],'kind'=>'custom','description'=>''];$r['label']=$c['label'];$r['kind']=$c['kind'];$r['description']=$c['description'];$r['config']=json_decode((string)$r['config_json'],true)?:[];}unset($r);return $rows;
+    foreach($rows as &$r){$c=$catalog[$r['feature_key']]??['label'=>$r['feature_key'],'kind'=>'custom','description'=>''];$r['config']=json_decode((string)$r['config_json'],true)?:[];$r['label']=(string)($r['config']['label']??$c['label']);$r['kind']=$c['kind'];$r['description']=(string)($r['config']['description']??$c['description']);}unset($r);return $rows;
 }
 function saas_feature_options(int $featureId): array {
     $q=saas_db()->prepare("SELECT * FROM tour_feature_options WHERE tour_feature_id=? AND status='ACTIVE' ORDER BY sort_order,id");$q->execute([$featureId]);return $q->fetchAll();
