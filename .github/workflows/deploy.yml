@@ -100,7 +100,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '$DEPLOY_PATH' && mkdir -p uploads/tours && chown -R '$DEPLOY_USER:$DEPLOY_USER' uploads && chmod 775 uploads && chmod 775 uploads/tours && stat -c 'uploads=%U:%G %a' uploads && stat -c 'tours=%U:%G %a' uploads/tours"
+            "cd '$DEPLOY_PATH' && mkdir -p uploads/tours && clpctl system:permissions:reset --directories=775 --files=664 --path=uploads && chmod 775 uploads uploads/tours && test -w uploads/tours && touch uploads/tours/.deployment-write-test && rm -f uploads/tours/.deployment-write-test && stat -c 'uploads=%U:%G %a writable=%A' uploads && stat -c 'tours=%U:%G %a writable=%A' uploads/tours"
 
       - name: Run database migrations
         env:
