@@ -402,6 +402,22 @@ test_assert(
     'Tour owner cannot be removed through team management'
 );
 
+// -------------------------------------------------------------------------
+// Tour hub and dashboard UX contracts.
+// -------------------------------------------------------------------------
+$hubText=file_text('tours.php');
+test_assert($hubText!=='' && has_all($hubText,['Current plan','Registered tours','Create tour','Open dashboard','billing.php','team.php','account_settings.php','logout.php']),'Tour hub exposes account summary, tour actions and settings navigation');
+$createText=file_text('tour_create.php');
+test_assert($createText!=='' && has_all($createText,['default_transport','banner_image','tour_settings','tour.created']),'Tour creation stores default transport and dashboard banner settings');
+$dashText=file_text('dashboard.php');
+test_assert($dashText!=='' && has_all($dashText,['Tour note','Schedule','Transport','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php']),'Tour dashboard exposes operational cards and management panels');
+$openText=file_text('tour_open.php');
+test_assert($openText!=='' && has_all($openText,['tour_members','saas_set_context','dashboard.php']),'Tour opening is scoped to an organization member before changing context');
+$accountText=file_text('account_settings.php');
+test_assert($accountText!=='' && has_all($accountText,['saas_check_csrf()','UPDATE users SET name=?']),'Account settings are protected by CSRF and update the signed-in user only');
+$publicUrlsText=file_text('public_urls.php');
+test_assert($publicUrlsText!=='' && has_all($publicUrlsText,['tour_open.php','tour_settings.php','Public URLs']),'Public URL hub lists only accessible organization tours');
+
 echo "\n" . str_repeat('-', 32) . "\n";
 echo "Passed: {$passed}\n";
 echo "Failed: " . count($failures) . "\n";
