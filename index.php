@@ -1,11 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/bootstrap.php';
-if (saas_authenticated()) {
-    $orgs = saas_organizations_for_user(saas_user_id());
-    if ($orgs) saas_redirect('dashboard.php');
-    saas_redirect('organization_create.php');
-}
+$isAuthenticated = saas_authenticated();
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -37,7 +33,7 @@ if (saas_authenticated()) {
 <header class="site-header"><div class="container nav">
 <a class="nav-logo" href="/"><img src="assets/gotm-logo.png" alt="GoTM — GoZyraa Tour Management"></a>
 <nav class="nav-links"><a href="#features">Features</a><a href="#how">How it works</a><a href="#operations">Operations</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
-<div class="nav-actions"><a class="btn btn-outline" href="login.php">Sign in</a><a class="btn btn-primary" href="signup.php">Start free</a></div><button class="menu" aria-label="Menu">☰</button>
+<div class="nav-actions"><?php if ($isAuthenticated): ?><a class="btn btn-primary" href="dashboard.php">Dashboard</a><?php else: ?><a class="btn btn-outline" href="login.php">Sign in</a><a class="btn btn-primary" href="signup.php">Start free</a><?php endif; ?></div><button class="menu" aria-label="Menu">☰</button>
 </div></header>
 <main>
 <section class="hero hero-premium">
@@ -48,7 +44,7 @@ if (saas_authenticated()) {
 <span class="eyebrow"><i></i> TOUR OPERATIONS, SIMPLIFIED</span>
 <h1>Turn every journey into a <span>better-run tour.</span></h1>
 <p>From passenger registration to seats, rooms, payments and secure digital tickets — GoTM gives your whole team one clear place to run the journey.</p>
-<div class="hero-actions"><a class="btn btn-primary" href="signup.php">Start free — no card required</a><a class="btn hero-ghost" href="#features">See what GoTM can do <b>→</b></a></div>
+<div class="hero-actions"><a class="btn btn-primary" href="<?= $isAuthenticated ? 'dashboard.php' : 'signup.php' ?>"><?= $isAuthenticated ? 'Open dashboard →' : 'Start free — no card required' ?></a><a class="btn hero-ghost" href="#features">See what GoTM can do <b>→</b></a></div>
 <div class="hero-trust"><span><b>✓</b> Free to get started</span><span><b>✓</b> Secure customer portal</span><span><b>✓</b> Built for growing teams</span></div>
 </div>
 <div class="hero-side">
@@ -81,7 +77,7 @@ if (saas_authenticated()) {
 </div></div></section>
 <section class="cta" id="cta"><div class="container"><div class="cta-box"><div><div class="section-kicker" style="color:var(--gold2)">READY WHEN YOU ARE</div><h2>Make your next tour easier to run.</h2><p>Set up your GoTM workspace, create your first tour and start organizing your passengers, seats, rooms and payments in one place.</p></div><a class="btn btn-primary" href="signup.php">Start free →</a></div></div></section>
 </main>
-<footer class="footer"><div class="container footer-grid"><div><a class="footer-logo" href="/"><img src="assets/gotm-logo.png" alt="GoTM"></a><p style="font-size:12px;line-height:1.7;max-width:300px">GoTM — GoZyraa Tour Management. A modern platform for managing tours, bookings and passenger operations.</p></div><div><h4>Product</h4><a href="#features">Features</a><a href="#operations">Operations</a><a href="#pricing">Pricing</a></div><div><h4>Company</h4><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="login.php">Sign in</a></div><div><h4>Get started</h4><a href="signup.php">Start free</a><a href="#cta">Contact</a></div></div><div class="container footer-bottom"><span>© <?=date('Y')?> GoTM — GoZyraa Tour Management</span><span>Secure • Modern • Built for tour operators</span></div></footer>
+<footer class="footer"><div class="container footer-grid"><div><a class="footer-logo" href="/"><img src="assets/gotm-logo.png" alt="GoTM"></a><p style="font-size:12px;line-height:1.7;max-width:300px">GoTM — GoZyraa Tour Management. A modern platform for managing tours, bookings and passenger operations.</p></div><div><h4>Product</h4><a href="#features">Features</a><a href="#operations">Operations</a><a href="#pricing">Pricing</a></div><div><h4>Company</h4><a href="#how">How it works</a><a href="#faq">FAQ</a><?php if ($isAuthenticated): ?><a href="dashboard.php">Dashboard</a><?php else: ?><a href="login.php">Sign in</a><?php endif; ?></div><div><h4>Get started</h4><?php if ($isAuthenticated): ?><a href="dashboard.php">Open dashboard</a><?php else: ?><a href="signup.php">Start free</a><?php endif; ?><a href="#cta">Contact</a></div></div><div class="container footer-bottom"><span>© <?=date('Y')?> GoTM — GoZyraa Tour Management</span><span>Secure • Modern • Built for tour operators</span></div></footer>
 <script>
 document.querySelector('.menu')?.addEventListener('click',()=>{const n=document.querySelector('.nav-links');n.style.display=n.style.display==='flex'?'none':'flex';n.style.position='absolute';n.style.top='68px';n.style.left='14px';n.style.right='14px';n.style.padding='18px';n.style.background='#fff';n.style.border='1px solid #e4ebf1';n.style.borderRadius='14px';n.style.boxShadow='0 18px 45px rgba(11,42,73,.12)';n.style.flexDirection='column';n.style.alignItems='flex-start';});
 </script>
