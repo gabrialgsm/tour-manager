@@ -3,7 +3,7 @@ var allTours=link("tours.php","◫","All Tours");bottom.appendChild(allTours);
 var settingsWrap=document.createElement("div");settingsWrap.className="gm-settings-wrap";
 var settingsBtn=document.createElement("button");settingsBtn.type="button";settingsBtn.className="gm-settings-btn";settingsBtn.innerHTML="<span>⚙</span><b>Settings</b><i>⌄</i>";
 var settingsMenu=document.createElement("div");settingsMenu.className="gm-settings-menu";
-[["tours.php","Tours"],["tour_edit.php?id="+encodeURIComponent(String("(int)($_SESSION['tour_id']??0)")),"Edit tour"],["public_urls.php","Public URLs"],["billing.php","Billing"],["team.php","Organization Team"],["account_settings.php","Account Settings"]].forEach(function(x){var a=document.createElement("a");a.href=x[0];a.textContent=x[1];settingsMenu.appendChild(a)});
+[["tours.php","Tours"],["tour_edit.php","Edit tour"],["public_urls.php","Public URLs"],["billing.php","Billing"],["team.php","Organization Team"],["account_settings.php","Account Settings"]].forEach(function(x){var a=document.createElement("a");a.href=x[0];a.textContent=x[1];settingsMenu.appendChild(a)});
 settingsWrap.appendChild(settingsBtn);settingsWrap.appendChild(settingsMenu);bottom.appendChild(settingsWrap);
 bottom.appendChild(link("logout.php","↪","Logout"));side.appendChild(bottom);
 settingsBtn.addEventListener("click",function(e){e.stopPropagation();settingsWrap.classList.toggle("open")});
