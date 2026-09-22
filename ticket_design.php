@@ -46,30 +46,115 @@ if($_SERVER['REQUEST_METHOD']==='POST'){try{
 </style></head><body>
 <header class="top"><div><h1>Ticket Visual Designer</h1><div class="muted"><?=saas_h($tour['name'])?> · Canvas 720 × 350 px · A4 portrait · 3 tickets per sheet</div></div><div class="actions"><a class="btn" href="tickets.php">Back to Tickets</a><button class="btn primary" id="saveBtn" type="button">Save Design</button></div></header>
 <?php if($saved):?><div class="alert ok">Design saved. All tickets now use these positions dynamically.</div><?php endif;?><?php if($error):?><div class="alert err"><?=saas_h($error)?></div><?php endif;?>
-<form id="designForm" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="elements_json" id="elementsJson"><div class="layout"><aside class="panel">
-<h3>Design settings</h3><div class="field"><label>Design name</label><input name="design_name" value="<?=saas_h($name)?>"></div><div class="field"><label>Background / ticket artwork</label><input type="file" name="background" accept="image/jpeg,image/png,image/webp"></div><div class="muted">Recommended artwork: 720 × 350 px. A4 portrait, 3 tickets per sheet with cutting gap. JPG/PNG/WebP, max 10 MB.</div>
-<div class="section-title"><h3>Available fields</h3><span class="count" id="availableCount"></span></div><div class="library" id="library"></div>
-<div class="section-title"><h3>On canvas</h3><span class="count" id="activeCount"></span></div><div class="active-list" id="elements"></div>
-<div class="selected-controls" id="controls"><strong id="selectedTitle">Select a field</strong><div class="control-grid"><label>Width<input id="width<script>
-const defs=<?=json_encode($defaults,JSON_UNESCAPED_UNICODE)?>;let state=<?=json_encode($elements,JSON_UNESCAPED_UNICODE)?>;const stage=document.getElementById('stage'),library=document.getElementById('library'),list=document.getElementById('elements');let selected=null;
+<form id="designForm" method="post" enctype="multipart/form-data">
+<input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>">
+<input type="hidden" name="elements_json" id="elementsJson">
+<div class="layout">
+<aside class="panel">
+<h3>Design settings</h3>
+<div class="field"><label>Design name</label><input name="design_name" value="<?=saas_h($name)?>"></div>
+<div class="field"><label>Background / ticket artwork</label><input type="file" name="background" accept="image/jpeg,image/png,image/webp"></div>
+<div class="muted">Recommended artwork: 720 × 350 px. A4 portrait, 3 tickets per sheet with cutting gap. JPG/PNG/WebP, max 10 MB.</div>
+<div class="section-title"><h3>Available fields</h3><span class="count" id="availableCount"></span></div>
+<div class="library" id="library"></div>
+<div class="section-title"><h3>On canvas</h3><span class="count" id="activeCount"></span></div>
+<div class="active-list" id="elements"></div>
+<div class="selected-controls" id="controls">
+<strong id="selectedTitle">Select a field</strong>
+<div class="control-grid">
+<label>Width<input id="widthInput" type="number" min="10" max="720"></label>
+<label>Height<input id="heightInput" type="number" min="10" max="350"></label>
+</div>
+<div class="hint" id="controlHint">Drag a field to move it. Use the blue corner handle to resize it.</div>
+</div>
+<div class="demo-note"><strong>Demo data:</strong> the canvas shows sample passenger/tour values only so you can position everything visually. Actual ticket data will replace them when printed.</div>
+<div class="help">Drag a field from <strong>Available fields</strong> onto the ticket to add it. Remove anything you do not need; removed fields can be dragged back from the left later. QR Code has a resize handle and stays square while resizing.</div>
+</aside>
+<main class="stage-wrap"><div class="stage" id="stage" aria-label="Ticket canvas"></div></main>
+</div>
+</form>
+<script>
+const defs=<?=json_encode($defaults,JSON_UNESCAPED_UNICODE)?>;
+let state=<?=json_encode($elements,JSON_UNESCAPED_UNICODE)?>;
+const stage=document.getElementById('stage'),library=document.getElementById('library'),list=document.getElementById('elements');
+let selected=null;
 const labels=Object.fromEntries(Object.entries(defs).map(([k,v])=>[k,v.label]));
 function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
-function demoSvg(key){let seed=0;for(const ch of key)seed=(seed*31+ch.charCodeAt(0))%997;let cells='';const size=21;for(let y=0;y<size;y++)for(let x=0;x<size;x++){const finder=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);let on=finder?((x===0||x===6||y===0||y===6||(x>=2&&x<=4&&y>=2&&y<=4))):((seed+x*17+y*29+x*y*7)%5<2);if(on)cells+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;}return `<svg viewBox="0 0 21 21" preserveAspectRatio="none" aria-hidden="true"><rect width="21" height="21" fill="#fff"/>${cells}</svg>`;}
+function demoSvg(key){
+ let seed=0;for(const ch of key)seed=(seed*31+ch.charCodeAt(0))%997;
+ let cells='';const size=21;
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const finder=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);
+  const on=finder?((x===0||x===6||y===0||y===6||(x>=2&&x<=4&&y>=2&&y<=4))):((seed+x*17+y*29+x*y*7)%5<2);
+  if(on)cells+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>';
+ }
+ return '<svg viewBox="0 0 21 21" preserveAspectRatio="none" aria-hidden="true"><rect width="21" height="21" fill="#fff"/>'+cells+'</svg>';
+}
 function select(k){if(!state[k])return;selected=k;render();}
-function addField(k,x=35,y=35){if(state[k]){select(k);return;}const d=defs[k];state[k]={...d,x:clamp(x,0,720-d.w),y:clamp(y,0,350-d.h)};select(k);}
+function addField(k,x=35,y=35){
+ if(state[k]){select(k);return;}
+ const d=defs[k];state[k]={...d,x:clamp(x,0,720-d.w),y:clamp(y,0,350-d.h)};select(k);
+}
 function removeField(k){if(!state[k])return;delete state[k];if(selected===k)selected=null;render();}
-function updateSize(axis,value){if(!selected||!state[selected])return;const v=state[selected];const min=10;if(selected==='qr'){const s=clamp(Number(value)||165,min,350);v.w=s;v.h=s;}else if(axis==='w'){v.w=clamp(Number(value)||v.w,min,720);v.x=clamp(v.x,0,720-v.w);}else{v.h=clamp(Number(value)||v.h,min,350);v.y=clamp(v.y,0,350-v.h);}render();}
+function updateSize(axis,value){
+ if(!selected||!state[selected])return;
+ const v=state[selected],min=10;
+ if(selected==='qr'){const z=clamp(Number(value)||165,min,350);v.w=z;v.h=z;}
+ else if(axis==='w'){v.w=clamp(Number(value)||v.w,min,720);v.x=clamp(v.x,0,720-v.w);}
+ else{v.h=clamp(Number(value)||v.h,min,350);v.y=clamp(v.y,0,350-v.h);}
+ render();
+}
 function render(){
  stage.querySelectorAll('.item').forEach(e=>e.remove());library.innerHTML='';list.innerHTML='';
- Object.entries(defs).forEach(([key,d])=>{if(state[key])return;const row=document.createElement('div');row.className='element';row.draggable=true;row.dataset.key=key;row.innerHTML=`<span>${d.label}</span><button class="add" type="button">＋</button>`;row.querySelector('.add').onclick=()=>addField(key);row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',key);e.dataTransfer.effectAllowed='copy';row.classList.add('dragging')});row.addEventListener('dragend',()=>row.classList.remove('dragging'));library.appendChild(row);});
- Object.keys(state).forEach(key=>{const row=document.createElement('div');row.className='element active-row';row.innerHTML=`<span class="name">${labels[key]}</span><button class="remove" type="button" title="Remove field">×</button>`;row.onclick=()=>select(key);row.querySelector('.remove').onclick=e=>{e.stopPropagation();removeField(key)};list.appendChild(row);});
- Object.entries(state).forEach(([key,v])=>{const el=document.createElement('div');el.className='item'+(key==='qr'?' qr':'');el.dataset.key=key;el.style.left=v.x+'px';el.style.top=v.y+'px';el.style.width=v.w+'px';el.style.height=v.h+'px';el.style.fontSize=v.size+'px';el.style.fontWeight=v.weight;if(key==='qr'){el.innerHTML=demoSvg(key)+`<span class="qr-demo-text">${defs[key].demo}</span>`;}else{el.textContent=defs[key].demo;}if(key===selected)el.classList.add('selected');stage.appendChild(el);el.addEventListener('mousedown',e=>{if(e.target.classList.contains('resize-handle'))return;drag(e,key)});const handle=document.createElement('span');handle.className='resize-handle';handle.title='Resize';handle.addEventListener('mousedown',e=>resizeStart(e,key));el.appendChild(handle);});
- document.getElementById('availableCount').textContent=Object.keys(defs).filter(k=>!state[k]).length+' available';document.getElementById('activeCount').textContent=Object.keys(state).length+' on canvas';
- const title=document.getElementById('selectedTitle'),wi=document.getElementById('widthInput'),hi=document.getElementById('heightInput');if(selected&&state[selected]){title.textContent=labels[selected];wi.value=state[selected].w;hi.value=state[selected].h;wi.disabled=false;hi.disabled=false;document.getElementById('controlHint').textContent=selected==='qr'?'QR Code stays square. Drag the blue corner to make it larger or smaller.':'Drag to move; use the blue corner to resize.';}else{title.textContent='Select a field';wi.value='';hi.value='';wi.disabled=true;hi.disabled=true;document.getElementById('controlHint').textContent='Drag a field to move it. Use the blue corner handle to resize it.';}
+ Object.entries(defs).forEach(([key,d])=>{
+  if(state[key])return;
+  const row=document.createElement('div');row.className='element';row.draggable=true;row.dataset.key=key;
+  row.innerHTML='<span>'+d.label+'</span><button class="add" type="button">＋</button>';
+  row.querySelector('.add').onclick=()=>addField(key);
+  row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',key);e.dataTransfer.effectAllowed='copy';row.classList.add('dragging')});
+  row.addEventListener('dragend',()=>row.classList.remove('dragging'));library.appendChild(row);
+ });
+ Object.keys(state).forEach(key=>{
+  const row=document.createElement('div');row.className='element active-row';
+  row.innerHTML='<span class="name">'+labels[key]+'</span><button class="remove" type="button" title="Remove field">×</button>';
+  row.onclick=()=>select(key);row.querySelector('.remove').onclick=e=>{e.stopPropagation();removeField(key)};list.appendChild(row);
+ });
+ Object.entries(state).forEach(([key,v])=>{
+  const el=document.createElement('div');el.className='item'+(key==='qr'?' qr':'');el.dataset.key=key;
+  el.style.left=v.x+'px';el.style.top=v.y+'px';el.style.width=v.w+'px';el.style.height=v.h+'px';el.style.fontSize=v.size+'px';el.style.fontWeight=v.weight;
+  if(key==='qr')el.innerHTML=demoSvg(key)+'<span class="qr-demo-text">'+defs[key].demo+'</span>';else el.textContent=defs[key].demo;
+  if(key===selected)el.classList.add('selected');stage.appendChild(el);
+  el.addEventListener('mousedown',e=>{if(e.target.classList.contains('resize-handle'))return;drag(e,key)});
+  const handle=document.createElement('span');handle.className='resize-handle';handle.title='Resize';handle.addEventListener('mousedown',e=>resizeStart(e,key));el.appendChild(handle);
+ });
+ document.getElementById('availableCount').textContent=Object.keys(defs).filter(k=>!state[k]).length+' available';
+ document.getElementById('activeCount').textContent=Object.keys(state).length+' on canvas';
+ const title=document.getElementById('selectedTitle'),wi=document.getElementById('widthInput'),hi=document.getElementById('heightInput');
+ if(selected&&state[selected]){
+  title.textContent=labels[selected];wi.value=state[selected].w;hi.value=state[selected].h;wi.disabled=false;hi.disabled=false;
+  document.getElementById('controlHint').textContent=selected==='qr'?'QR Code stays square. Drag the blue corner to make it larger or smaller.':'Drag to move; use the blue corner to resize.';
+ }else{
+  title.textContent='Select a field';wi.value='';hi.value='';wi.disabled=true;hi.disabled=true;
+  document.getElementById('controlHint').textContent='Drag a field to move it. Use the blue corner handle to resize it.';
+ }
 }
-function drag(e,key){e.preventDefault();select(key);const startX=e.clientX,startY=e.clientY,ox=state[key].x,oy=state[key].y;function move(ev){state[key].x=clamp(Math.round(ox+ev.clientX-startX),0,720-state[key].w);state[key].y=clamp(Math.round(oy+ev.clientY-startY),0,350-state[key].h);render();}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);}
-function resizeStart(e,key){e.preventDefault();e.stopPropagation();select(key);const startX=e.clientX,startY=e.clientY,ow=state[key].w,oh=state[key].h,ox=state[key].x,oy=state[key].y;function move(ev){let w=clamp(Math.round(ow+ev.clientX-startX),10,720-ox),h=clamp(Math.round(oh+ev.clientY-startY),10,350-oy);if(key==='qr'){const s=clamp(Math.max(w,h),10,Math.min(720-ox,350-oy));w=s;h=s;}state[key].w=w;state[key].h=h;render();}function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);}
-stage.addEventListener('dragover',e=>{e.preventDefault();stage.classList.add('drop-active');});stage.addEventListener('dragleave',()=>stage.classList.remove('drop-active'));stage.addEventListener('drop',e=>{e.preventDefault();stage.classList.remove('drop-active');const key=e.dataTransfer.getData('text/plain');if(!defs[key])return;const r=stage.getBoundingClientRect();addField(key,Math.round((e.clientX-r.left)-defs[key].w/2),Math.round((e.clientY-r.top)-defs[key].h/2));});
-document.getElementById('widthInput').addEventListener('change',e=>updateSize('w',e.target.value));document.getElementById('heightInput').addEventListener('change',e=>updateSize('h',e.target.value));
-document.getElementById('saveBtn').onclick=()=>{document.getElementById('elementsJson').value=JSON.stringify(state);document.getElementById('designForm').submit()};render();
-</script>
+function drag(e,key){
+ e.preventDefault();select(key);const sx=e.clientX,sy=e.clientY,ox=state[key].x,oy=state[key].y;
+ function move(ev){state[key].x=clamp(Math.round(ox+ev.clientX-sx),0,720-state[key].w);state[key].y=clamp(Math.round(oy+ev.clientY-sy),0,350-state[key].h);render();}
+ function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}
+ document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+}
+function resizeStart(e,key){
+ e.preventDefault();e.stopPropagation();select(key);const sx=e.clientX,sy=e.clientY,ow=state[key].w,oh=state[key].h,ox=state[key].x,oy=state[key].y;
+ function move(ev){let w=clamp(Math.round(ow+ev.clientX-sx),10,720-ox),h=clamp(Math.round(oh+ev.clientY-sy),10,350-oy);if(key==='qr'){const z=clamp(Math.max(w,h),10,Math.min(720-ox,350-oy));w=z;h=z;}state[key].w=w;state[key].h=h;render();}
+ function up(){document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);}
+ document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+}
+stage.addEventListener('dragover',e=>{e.preventDefault();stage.classList.add('drop-active')});
+stage.addEventListener('dragleave',()=>stage.classList.remove('drop-active'));
+stage.addEventListener('drop',e=>{e.preventDefault();stage.classList.remove('drop-active');const key=e.dataTransfer.getData('text/plain');if(!defs[key])return;const r=stage.getBoundingClientRect();addField(key,Math.round((e.clientX-r.left)-defs[key].w/2),Math.round((e.clientY-r.top)-defs[key].h/2));});
+document.getElementById('widthInput').addEventListener('change',e=>updateSize('w',e.target.value));
+document.getElementById('heightInput').addEventListener('change',e=>updateSize('h',e.target.value));
+document.getElementById('saveBtn').onclick=()=>{document.getElementById('elementsJson').value=JSON.stringify(state);document.getElementById('designForm').submit()};
+render();
+</script></body></html>
