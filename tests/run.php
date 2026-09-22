@@ -423,6 +423,8 @@ test_assert(
 );
 $shellText=file_text('assets/app-shell.js');
 test_assert($shellText!=='' && has_all($shellText,['gm-sidebar','payments.php','expenses.php','tour_team.php','tickets.php','income.php','features.php','Settings','Logout']),'Shared workspace shell provides the dashboard sidebar navigation');
+$incomeText=file_text('income.php');
+test_assert($incomeText!=='' && has_all($incomeText,['information_schema.COLUMNS','organization_id','INSERT INTO incomes']),'Income insert supports legacy organization_id schema');
 $seatAssignText=file_text('seat_assign.php');
 test_assert(
     $seatAssignText!=='' &&
