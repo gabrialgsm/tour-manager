@@ -412,8 +412,14 @@ test_assert($createText!=='' && has_all($createText,['default_transport','banner
 $dashText=file_text('dashboard.php');
 test_assert(
     $dashText!=='' &&
-    has_all($dashText,['Tour note','Schedule','Bus seat plan','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php','seat_plan.php','data-bus-tab','settingsBtn']),
-    'Tour dashboard exposes operational cards, default bus seat plan and settings navigation'
+    has_all($dashText,['Tour note','Schedule','Quick reference','Bus seat plan','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php','seat_plan.php','buses.php','data-bus-tab','seatModal','dragstart','settingsBtn']),
+    'Tour dashboard exposes quick reference, default bus seat plan, passenger seat assignment and settings navigation'
+);
+$seatAssignText=file_text('seat_assign.php');
+test_assert(
+    $seatAssignText!=='' &&
+    has_all($seatAssignText,['source_seat_id','target_seat_id','seat.changed','Swapped']),
+    'Seat assignment endpoint supports drag-and-drop seat changes and swaps'
 );
 $openText=file_text('tour_open.php');
 test_assert($openText!=='' && has_all($openText,['tour_members','saas_set_context','dashboard.php']),'Tour opening is scoped to an organization member before changing context');
