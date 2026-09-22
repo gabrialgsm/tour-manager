@@ -441,6 +441,12 @@ test_assert(
     str_contains($featureHelperText,"\$r['config']['label']??\$c['label']"),
     'Enabled custom features use their saved display label and description'
 );
+$expenseText=file_text('expenses.php');
+test_assert(
+    $expenseText!=='' &&
+    has_all($expenseText,['update_expense','expense.edit','data-edit-expense','Edit expense','Save changes']),
+    'Expense history supports permission-protected editing'
+);
 $dashText=file_text('dashboard.php');
 test_assert(
     $dashText!=='' &&
