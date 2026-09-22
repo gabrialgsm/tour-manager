@@ -429,6 +429,18 @@ $hubText=file_text('tours.php');
 test_assert($hubText!=='' && has_all($hubText,['Current plan','Registered tours','Create tour','Open dashboard','billing.php','team.php','account_settings.php','logout.php']),'Tour hub exposes account summary, tour actions and settings navigation');
 $createText=file_text('tour_create.php');
 test_assert($createText!=='' && has_all($createText,['default_transport','banner_image','tour_settings','tour.created']),'Tour creation stores default transport and dashboard banner settings');
+$featuresText=file_text('features.php');
+test_assert(
+    $featuresText!=='' &&
+    has_all($featuresText,['add_custom','toggle_custom','delete_custom','custom_label','custom_description','Enable','Disable','My custom features']),
+    'Tour features supports unlimited custom features with independent enable and disable controls'
+);
+$featureHelperText=file_text('feature_helpers.php');
+test_assert(
+    $featureHelperText!=='' &&
+    str_contains($featureHelperText,"\$r['config']['label']??\$c['label']"),
+    'Enabled custom features use their saved display label and description'
+);
 $dashText=file_text('dashboard.php');
 test_assert(
     $dashText!=='' &&
