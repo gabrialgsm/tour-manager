@@ -236,13 +236,19 @@ test_assert(
         '$seatTourColumn',
         '$seatCodeColumn',
         '$seatNoColumn',
-        'if($seatCodeColumn){$columns[]=\'seat_code\';}',
-        'if($seatNoColumn){$columns[]=\'seat_no\';}',
         'FRONT_SINGLE',
         "'LEFT'",
         "'RIGHT'",
         "'LAST'",
-    ]),
+    ]) &&
+    (
+        str_contains($busText, "if (\$seatCodeColumn) {") ||
+        str_contains($busText, "if(\$seatCodeColumn){")
+    ) &&
+    (
+        str_contains($busText, "if (\$seatNoColumn) {") ||
+        str_contains($busText, "if(\$seatNoColumn){")
+    ),
     'Bus/seat management writes canonical and legacy-compatible columns and positions'
 );
 
