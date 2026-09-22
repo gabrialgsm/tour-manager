@@ -338,6 +338,22 @@ test_assert(
  test_assert($publicText!=='' && str_contains($publicText, 'saas_has_entitlement($orgId,\'custom_branding\')'), 'Custom public-page branding enforces centralized entitlement');
  
 // -------------------------------------------------------------------------
+// Super Admin console contracts.
+// -------------------------------------------------------------------------
+$superAdminText = file_text('super_admin.php');
+test_assert(
+    $superAdminText !== '' &&
+    has_all($superAdminText, ['super_admins', 'saas_check_csrf()', 'super_admin.subscription_status', 'current_period_end', "status IN ('ACTIVE','TRIALING')", '$stats[\'mrr\']']),
+    'Super Admin console has access control, CSRF, subscription status controls and MRR calculation'
+);
+$superOrgText = file_text('super_admin_organization.php');
+test_assert(
+    $superOrgText !== '' &&
+    has_all($superOrgText, ['super_admins', 'organization_members', 'organization_subscriptions', 'billing_invoices', 'saas_plan_entitlements', 'audit_log']),
+    'Super Admin organization detail view exposes team, subscription, entitlements, invoices and audit history'
+);
+
+// -------------------------------------------------------------------------
 // Organization / team management contracts.
 // -------------------------------------------------------------------------
 
