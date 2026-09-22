@@ -370,6 +370,16 @@ test_assert(
 );
 
 // -------------------------------------------------------------------------
+// Billing operations contracts.
+// -------------------------------------------------------------------------
+$superBillingText = file_text('super_admin_billing.php');
+test_assert(
+    $superBillingText !== '' &&
+    has_all($superBillingText, ['super_admins', 'saas_check_csrf()', 'billing_invoices', 'invoice_create', 'invoice_status', 'super_admin.invoice_created']),
+    'Super Admin invoice management is protected and auditable'
+);
+
+// -------------------------------------------------------------------------
 // Organization / team management contracts.
 // -------------------------------------------------------------------------
 
