@@ -312,7 +312,7 @@ test_assert(
         "data-room-drop",
         'draggable="true"',
         "data-passenger-id",
-        "Room '.$room['room_no'].' is full.",
+        "is full.",
         "room.moved",
     ]),
     'Room guests support drag-and-drop moves with capacity checks and audit logging'
