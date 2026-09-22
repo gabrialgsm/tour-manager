@@ -451,8 +451,11 @@ if ($failures) {
 }
 
 echo "All automated tests passed.\n";
+$tourCreateText=file_text('tour_create.php');$tourEditText=file_text('tour_edit.php');
+test_assert($tourCreateText!==''&&has_all($tourCreateText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour create supports image uploads and departure options');
+test_assert($tourEditText!==''&&has_all($tourEditText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour edit supports image uploads and departure options');
 $passengerText=file_text('passengers.php');
-test_assert($passengerText!=='' && has_all($passengerText,['gotm-logo.png','features.php','expenses.php','income.php','tickets.php','tour_team.php','recentProfiles','reusable-list']),'Passenger page uses the shared-style sidebar and shows reusable passenger profiles');
+test_assert($passengerText!=='' && has_all($passengerText,['gotm-logo.png','features.php','expenses.php','income.php','tickets.php','tour_team.php','recentProfiles','reusable-list','departureOptions','Select departure point']),'Passenger page uses the shared-style sidebar and shows reusable passenger profiles');
 $toursText=file_text('tours.php');
 test_assert($toursText!=='' && has_all($toursText,['gotm-logo.png','settingsBtn','settingsMenu','tour_edit.php','public_urls.php','billing.php','team.php','account_settings.php','logout.php']),'Tours page uses the GoTM sidebar and settings menu');
 test_assert(substr($toursText,strpos($toursText,'<div class="brand">'),250)===false,'Tours sidebar does not duplicate the GoTM logo markup');
