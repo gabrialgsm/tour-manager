@@ -337,6 +337,8 @@ test_assert(
  $billingText=file_text('billing.php');
  test_assert($billingText!=='' && has_all($billingText,['organization.manage','saas_plan(','saas_entitlement(','billing_events','saas_check_csrf()']), 'Billing UI is organization-admin protected, CSRF guarded and audit/event ready');
  $tourCreateText=file_text('tour_create.php');
+test_assert(str_contains($tourCreateText,'$slugInput=trim') && str_contains($tourCreateText,'id="slug"') && str_contains($tourCreateText,'makeSlug'),'Tour create auto-generates an editable public slug');
+
  test_assert($tourCreateText!=='' && str_contains($tourCreateText, 'saas_require_limit($orgId,\'max_tours\''), 'Tour creation enforces centralized max_tours entitlement');
  $featureSettingsText=file_text('features.php');
  test_assert($featureSettingsText!=='' && str_contains($featureSettingsText, 'saas_require_entitlement($orgId,\'custom_features\''), 'Custom tour features enforce centralized entitlement');
@@ -454,6 +456,7 @@ echo "All automated tests passed.\n";
 $tourCreateText=file_text('tour_create.php');$tourEditText=file_text('tour_edit.php');
 test_assert($tourCreateText!==''&&has_all($tourCreateText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour create supports image uploads and departure options');
 test_assert($tourEditText!==''&&has_all($tourEditText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour edit supports image uploads and departure options');
+test_assert(has_all($tourEditText,['slugInput','Public URL / slug','UPDATE tours SET name=?,slug=?']),'Tour edit exposes and saves the public slug');
 $passengerText=file_text('passengers.php');
 test_assert($passengerText!=='' && has_all($passengerText,['gotm-logo.png','features.php','expenses.php','income.php','tickets.php','tour_team.php','recentProfiles','reusable-list','departureOptions','Select departure point']),'Passenger page uses the shared-style sidebar and shows reusable passenger profiles');
 $toursText=file_text('tours.php');
