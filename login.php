@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         $q->execute([$identity,$identity]);
         $u=$q->fetch();
         $valid=false;
+        if ($u && $u['status']==='PENDING') throw new RuntimeException('Please verify your email address before signing in.');
         if ($u && $u['status']==='ACTIVE') $valid=password_verify($password,(string)$u['password_hash']);
         else password_verify($password,'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llCk0k9VQ2J4lq6Qw0Wq');
         if (!$valid) { admin_auth_rate_fail($identity); throw new RuntimeException('Invalid username/email or password.'); }
