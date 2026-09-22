@@ -1,0 +1,45 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/bootstrap.php';
+saas_require_login();
+$orgId=saas_require_organization();
+$db=saas_db();
+$org=saas_current_organization();
+$user=saas_current_user();
+$error='';$ok='';
+
+if($_SERVER['REQUEST_METHOD']==='POST'){
+  try{
+    saas_check_csrf();
+    $action=(string)($_POST['action']??'');
+    if($action==='delete'){
+      saas_require_permission('tour.delete');
+      $id=(int)($_POST['tour_id']??0);
+      $q=$db->prepare("SELECT id,name FROM tours WHERE id=? AND organization_id=? LIMIT 1");$q->execute([$id,$orgId]);$t=$q->fetch();
+      if(!$t)throw new RuntimeException('Tour not found.');
+      $q=$db->prepare("SELECT COUNT(*) FROM tour_passengers WHERE tour_id=?");$q->execute([$id]);
+      if((int)$q->fetchColumn()>0)throw new RuntimeException('This tour already has passengers. Use Edit and set it to Archived instead of deleting it.');
+      $q=$db->prepare("DELETE FROM tours WHERE id=? AND organization_id=?");$q->execute([$id,$orgId]);
+      if(saas_current_tour_id()===$id)$_SESSION['tour_id']=0;
+      saas_audit('tour.deleted','tour',$id,$t['name']);$ok='Tour deleted.';
+    }
+  }catch(Throwable $e){$error=$e->getMessage();}
+}
+
+$tours=saas_tours_for_user(saas_user_id(),$orgId);
+$plan=saas_plan($db,$orgId);
+$usage=saas_billing_usage($orgId);
+$maxTours=saas_entitlement($orgId,'max_tours',-1);
+$maxMembers=saas_entitlement($orgId,'max_members',-1);
+$memberCount=(int)$db->query("SELECT COUNT(*) FROM organization_members WHERE organization_id=".$orgId." AND status='ACTIVE'")->fetchColumn();
+$canCreate=saas_can('tour.create') && ($maxTours<0 || count($tours)<$maxTours);
+$baseUrl=rtrim((string)($config['app']['base_url']??''),'/');
+?>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tours — <?=saas_h($org['name'])?></title><link rel="stylesheet" href="assets/app.css"><style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#172033;font-family:Inter,Arial,sans-serif}.app{min-height:100vh;display:flex}.side{width:245px;background:#fff;border-right:1px solid #e5e7eb;padding:22px 14px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}.brand{font-size:22px;font-weight:900;padding:4px 10px 22px}.org{padding:12px;background:#f4f7fb;border-radius:12px;margin-bottom:18px}.org strong{display:block}.org small{color:#667085}.nav{display:grid;gap:4px}.nav a{padding:11px 12px;border-radius:10px;color:#344054;font-weight:700}.nav a:hover,.nav a.active{background:#eef6ff;color:#155eef}.nav.bottom{margin-top:auto;border-top:1px solid #edf0f2;padding-top:12px}.main{margin-left:245px;width:calc(100% - 245px);padding:28px 30px 60px}.top{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.top h1{margin:0;font-size:30px}.muted{color:#667085;font-size:13px}.btn{display:inline-block;padding:10px 14px;border-radius:9px;border:1px solid #d0d5dd;background:#fff;color:#172033;font-weight:800}.btn.primary{background:#155eef;color:#fff;border-color:#155eef}.btn.danger{background:#fff1f0;color:#b42318;border-color:#fecdca}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:17px}.stat small{display:block;color:#667085}.stat b{font-size:25px;display:block;margin-top:6px}.stat .link{font-size:12px;margin-top:7px;color:#155eef}.section{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:20px;margin-bottom:18px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.section h2{margin:0}.tour-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:15px}.tour{border:1px solid #e5e7eb;border-radius:15px;overflow:hidden;background:#fff}.cover{height:130px;background:linear-gradient(135deg,#155eef,#0f766e);background-size:cover;background-position:center;display:flex;align-items:end;padding:14px;color:#fff}.cover h3{margin:0;text-shadow:0 2px 8px #0006}.body{padding:15px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.pill{background:#f2f4f7;padding:5px 9px;border-radius:99px;font-size:11px;font-weight:800}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.empty{padding:42px 20px;text-align:center;border:1px dashed #cfd6df;border-radius:15px}.alert{padding:12px;border-radius:10px;margin-bottom:16px}.ok{background:#ecfdf3;color:#067647}.err{background:#fef3f2;color:#b42318}.upgrade{background:linear-gradient(135deg,#172033,#155eef);color:#fff}.upgrade .btn{color:#172033}.limit{font-size:12px;margin-top:5px}@media(max-width:950px){.cards{grid-template-columns:1fr 1fr}.tour-grid{grid-template-columns:1fr}}@media(max-width:700px){.side{position:static;width:100%;height:auto}.app{display:block}.main{margin-left:0;width:100%;padding:20px 14px}.nav.bottom{margin-top:14px}.cards{grid-template-columns:1fr 1fr}.top{align-items:flex-start;flex-direction:column}}@media(max-width:450px){.cards{grid-template-columns:1fr}}
+</style></head><body><div class="app"><aside class="side"><div class="brand">GoTM</div><div class="org"><strong><?=saas_h($org['name'])?></strong><small><?=saas_h($user['name']??$user['username']??'Account')?></small></div><nav class="nav"><a class="active" href="tours.php">▦ Tours</a></nav><nav class="nav bottom"><a href="tour_manage.php">Tours & management</a><a href="team.php">Organization team</a><a href="billing.php">Billing</a><a href="account_settings.php">Account settings</a><a href="logout.php">Log out</a></nav></aside>
+<main class="main"><div class="top"><div><h1>Your tours</h1><p class="muted">Create a tour, open its dashboard, or manage an existing trip.</p></div><?php if($canCreate):?><a class="btn primary" href="tour_create.php">＋ Create tour</a><?php endif;?></div>
+<?php if($ok):?><div class="alert ok"><?=saas_h($ok)?></div><?php endif;?><?php if($error):?><div class="alert err"><?=saas_h($error)?></div><?php endif;?>
+<section class="cards"><div class="stat"><small>Current plan</small><b><?=saas_h($plan['name'])?></b><div class="link"><a href="billing.php">View plan</a></div></div><div class="stat"><small>Registered tours</small><b><?=count($tours)?><?= $maxTours>=0?' / '.$maxTours:''?></b><div class="limit"><?= $maxTours>=0 && count($tours)>=$maxTours?'Tour limit reached':'Tour capacity available'?></div></div><div class="stat"><small>Active team</small><b><?=$memberCount?><?= $maxMembers>=0?' / '.$maxMembers:''?></b><div class="link"><a href="team.php">Manage team</a></div></div><div class="stat upgrade"><small>Need more capacity?</small><b>Upgrade</b><div class="limit">Unlock more tours, members and advanced features.</div><div style="margin-top:10px"><a class="btn" href="billing.php">View upgrade options</a></div></div></section>
+<section class="section"><div class="section-head"><div><h2>Tour list</h2><div class="muted"><?=count($tours)?> tour<?=count($tours)===1?'':'s'?> in this organization</div></div></div>
+<?php if(!$tours):?><div class="empty"><h3>Create your first tour</h3><p class="muted">Set the dates, default transport and public page details. Your tour dashboard will be ready next.</p><a class="btn primary" href="tour_create.php">＋ Create tour</a></div><?php else:?><div class="tour-grid"><?php foreach($tours as $t):$q=$db->prepare("SELECT setting_value FROM tour_settings WHERE tour_id=? AND setting_key='banner_image'");$q->execute([(int)$t['id']]);$banner=(string)($q->fetchColumn()?:'');$q=$db->prepare("SELECT setting_value FROM tour_settings WHERE tour_id=? AND setting_key='default_transport'");$q->execute([(int)$t['id']]);$transport=(string)($q->fetchColumn()?:'NONE');$url=$baseUrl.'/tour/'.rawurlencode((string)$t['slug']);?><article class="tour"><div class="cover" <?= $banner!==''?'style="background-image:linear-gradient(#0002,#0008),url(''.saas_h($banner).'')"' : ''?>><h3><?=saas_h($t['name'])?></h3></div><div class="body"><div class="meta"><span class="pill"><?=saas_h($t['status'])?></span><span class="pill"><?=saas_h($transport)?></span><?php if($t['start_date']):?><span class="pill"><?=saas_h($t['start_date'])?><?=!empty($t['end_date'])?' → '.saas_h($t['end_date']):''?></span><?php endif;?></div><div class="muted">Public URL: <?=saas_h($url)?></div><div class="actions"><a class="btn primary" href="tour_open.php?id=<?=$t['id']?>">Open dashboard</a><a class="btn" href="tour_edit.php?id=<?=$t['id']?>">Edit</a><a class="btn" target="_blank" rel="noopener" href="<?=saas_h($url)?>">View public</a><?php if(saas_can('tour.delete')):?><form method="post" style="display:inline" onsubmit="return confirm('Delete this empty tour?')"><input type="hidden" name="csrf" value="<?=saas_h(saas_csrf())?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="tour_id" value="<?=$t['id']?>"><button class="btn danger">Delete</button></form><?php endif;?></div></div></article><?php endforeach;?></div><?php endif;?></section></main></div></body></html>
