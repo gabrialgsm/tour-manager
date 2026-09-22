@@ -441,6 +441,21 @@ test_assert(
     str_contains($featureHelperText,"\$r['config']['label']??\$c['label']"),
     'Enabled custom features use their saved display label and description'
 );
+$ticketDesignText=file_text('ticket_design.php');
+$ticketPrintText=file_text('tickets_print_all.php');
+$ticketViewText=file_text('ticket.php');
+test_assert(
+    $ticketDesignText!=='' && has_all($ticketDesignText,['720 × 350 px','A4 portrait','3 tickets per sheet','canvas_width','canvas_height']),
+    'Ticket visual designer uses the A4 portrait three-up canvas'
+);
+test_assert(
+    $ticketPrintText!=='' && has_all($ticketPrintText,['array_chunk($rows,3)','A4 portrait','grid-template-rows:repeat(3,92mm)','row-gap:5mm']),
+    'All tickets print three per A4 portrait sheet with cutting gaps'
+);
+test_assert(
+    $ticketViewText!=='' && has_all($ticketViewText,['3up','three-up-sheet','3 tickets / A4 portrait']),
+    'Single ticket view supports three-up A4 portrait printing'
+);
 $expenseText=file_text('expenses.php');
 test_assert(
     $expenseText!=='' &&
