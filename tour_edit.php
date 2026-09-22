@@ -10,7 +10,7 @@ function upload_tour_image(string $field,int $tourId,string $kind): string {
  $minW=$kind==='cover'?1200:200; $minH=$kind==='cover'?450:60; if((int)$info[0]<$minW||(int)$info[1]<$minH) throw new RuntimeException(ucfirst($kind).' image must be at least '.$minW.' × '.$minH.' px.');
  $dir=__DIR__.'/uploads/tours/'.$tourId; if(!is_dir($dir)&&!mkdir($dir,0755,true)&&!is_dir($dir)) throw new RuntimeException('Could not create the image upload directory.');
  $name=$kind.'-'.bin2hex(random_bytes(8)).'.'.$allowed[$mime]; if(!move_uploaded_file((string)$f['tmp_name'],$dir.'/'.$name)) throw new RuntimeException('Could not save the '.$kind.' image.');
- return 'uploads/tours/'.$tourId.'/'.$name;
+ return '/uploads/tours/'.$tourId.'/'.$name;
 }
 saas_require_login();
 $orgId=saas_require_organization();saas_require_permission('tour.edit');$id=(int)($_GET['id']??$_POST['id']??0);$db=saas_db();if($id<=0)$id=saas_current_tour_id();
