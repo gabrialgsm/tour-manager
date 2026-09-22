@@ -305,6 +305,18 @@ test_assert(
     ]),
     'Room forms preserve and validate the active tour context across POST requests'
 );
+test_assert(
+    $roomContextText !== '' &&
+    has_all($roomContextText, [
+        "move_room_guest",
+        "data-room-drop",
+        'draggable="true"',
+        "data-passenger-id",
+        "Room '.$room['room_no'].' is full.",
+        "room.moved",
+    ]),
+    'Room guests support drag-and-drop moves with capacity checks and audit logging'
+);
 
 // Accidental committed PHP error log must stay out of the repository.
 test_assert(!is_file($root . '/storage/php-error.log'), 'Committed PHP error log is absent');
