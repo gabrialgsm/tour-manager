@@ -445,8 +445,8 @@ $ticketDesignText=file_text('ticket_design.php');
 $ticketPrintText=file_text('tickets_print_all.php');
 $ticketViewText=file_text('ticket.php');
 test_assert(
-    $ticketDesignText!=='' && has_all($ticketDesignText,['720 × 350 px','A4 portrait','3 tickets per sheet','canvas_width','canvas_height']),
-    'Ticket visual designer uses the A4 portrait three-up canvas'
+    $ticketDesignText!=='' && has_all($ticketDesignText,['720 × 350 px','A4 portrait','3 tickets per sheet','canvas_width','canvas_height','Available fields','On canvas','demo','resize-handle','removeField']),
+    'Ticket visual designer supports removable/re-addable fields, demo data and resizing'
 );
 test_assert(
     $ticketPrintText!=='' && has_all($ticketPrintText,['array_chunk($rows,3)','A4 portrait','grid-template-rows:repeat(3,92mm)','row-gap:5mm']),
