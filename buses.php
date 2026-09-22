@@ -207,7 +207,7 @@ foreach ($buses as $busItem) {
 <main class="wrap">
 <div class="top">
 <div class="title"><div class="crumb">Tour dashboard &nbsp;›&nbsp; Buses &amp; Seats</div><h1>🚌 Buses &amp; Seats</h1><p>Manage tour buses, seat layouts and passenger seating.</p></div>
-<a class="btn" href="dashboard.php">← Back to Tour Dashboard</a>
+<div style="display:flex;gap:7px;flex-wrap:wrap"><a class="btn" href="dashboard.php">← Back to Tour Dashboard</a><a class="btn" target="_blank" href="export.php?type=buses&format=pdf">Print / PDF</a><a class="btn" href="export.php?type=buses&format=excel">Excel</a></div>
 </div>
 
 <?php if ($ok !== ''): ?><div class="alert msg"><?php echo saas_h($ok); ?></div><?php endif; ?>
