@@ -418,8 +418,8 @@ test_assert($createText!=='' && has_all($createText,['default_transport','banner
 $dashText=file_text('dashboard.php');
 test_assert(
     $dashText!=='' &&
-    has_all($dashText,['Tour note','Schedule','Quick reference','Bus seat plan','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php','seat_plan.php','buses.php','data-bus-tab','seatModal','dragstart','settingsBtn']),
-    'Tour dashboard exposes quick reference, default bus seat plan, passenger seat assignment and settings navigation'
+    has_all($dashText,['Tour note','Schedule','Bus seat plan','Accommodation','Recent passengers','payments.php','expenses.php','rooms.php','seat_plan.php','buses.php','data-bus-tab','seatModal','dragstart','settingsBtn','tour_team.php','tickets.php','income.php','features.php']),
+    'Tour dashboard exposes sidebar operations, default bus seat plan, passenger seat assignment and settings navigation'
 );
 $seatAssignText=file_text('seat_assign.php');
 test_assert(
