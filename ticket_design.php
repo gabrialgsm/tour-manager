@@ -20,6 +20,19 @@ $defaults=[
 ];
 $q=$db->prepare('SELECT * FROM tour_ticket_designs WHERE tour_id=? AND organization_id=? LIMIT 1');$q->execute([$tourId,$orgId]);$design=$q->fetch();
 $elements=$design?json_decode((string)$design['elements_json'],true):$defaults;if(!is_array($elements))$elements=$defaults;
+if($design){
+ $savedW=max(1,(int)($design['canvas_width']??720));$savedH=max(1,(int)($design['canvas_height']??350));
+ if($savedW!==720||$savedH!==350){
+  $sx=720/$savedW;$sy=350/$savedH;
+  foreach($elements as $k=>&$v){
+   if(!is_array($v))continue;
+   foreach(['x','w'] as $n)if(isset($v[$n]))$v[$n]=(int)round((float)$v[$n]*$sx);
+   foreach(['y','h'] as $n)if(isset($v[$n]))$v[$n]=(int)round((float)$v[$n]*$sy);
+   $v['x']=max(0,min(720-(int)($v['w']??10),(int)($v['x']??0)));
+   $v['y']=max(0,min(350-(int)($v['h']??10),(int)($v['y']??0)));
+  }unset($v);
+ }
+}
 $background=(string)($design['background_image']??'');$name=(string)($design['design_name']??'Default');
 function design_upload(string $field,int $tourId): string{
  if(empty($_FILES[$field])||($_FILES[$field]['error']??UPLOAD_ERR_NO_FILE)===UPLOAD_ERR_NO_FILE)return '';
@@ -70,7 +83,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){try{
 <div class="demo-note"><strong>Demo data:</strong> the canvas shows sample passenger/tour values only so you can position everything visually. Actual ticket data will replace them when printed.</div>
 <div class="help">Drag a field from <strong>Available fields</strong> onto the ticket to add it. Remove anything you do not need; removed fields can be dragged back from the left later. QR Code has a resize handle and stays square while resizing.</div>
 </aside>
-<main class="stage-wrap"><div class="stage" id="stage" aria-label="Ticket canvas"></div></main>
+<main class="stage-wrap"><div class="stage" id="stage" aria-label="Ticket canvas"<?php if($background!==''):?> style="background-image:url('<?=saas_h($background)?>')"<?php endif;?>></div></main>
 </div>
 </form>
 <script>
