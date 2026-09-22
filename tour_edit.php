@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require __DIR__.'/bootstrap.php';
 saas_require_login();
-$orgId=saas_require_organization();saas_require_permission('tour.edit');$id=(int)($_GET['id']??$_POST['id']??0);$db=saas_db();
+$orgId=saas_require_organization();saas_require_permission('tour.edit');$id=(int)($_GET['id']??$_POST['id']??0);$db=saas_db();if($id<=0)$id=saas_current_tour_id();
 $q=$db->prepare("SELECT t.* FROM tours t INNER JOIN tour_members tm ON tm.tour_id=t.id WHERE t.id=? AND t.organization_id=? AND tm.user_id=? AND tm.status='ACTIVE' LIMIT 1");$q->execute([$id,$orgId,saas_user_id()]);$t=$q->fetch();if(!$t){http_response_code(404);exit('Tour not found.');}
 $q=$db->prepare("SELECT setting_key,setting_value FROM tour_settings WHERE tour_id=? AND setting_key IN ('default_transport','banner_image')");$q->execute([$id]);$settings=[];foreach($q as $s)$settings[$s['setting_key']]=$s['setting_value'];
 $error='';$ok='';
