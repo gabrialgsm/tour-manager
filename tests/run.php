@@ -449,3 +449,7 @@ if ($failures) {
 }
 
 echo "All automated tests passed.\n";
+$settingsText=file_text('settings.php');
+test_assert($settingsText!=='' && has_all($settingsText,['saas_require_login','saas_require_permission','tour_edit.php']),'Settings entry uses the current SaaS auth and tour settings flow');
+$shellText=file_text('assets/app-shell.js');
+test_assert($shellText!=='' && has_all($shellText,['gm-settings-wrap','Public URLs','Billing','Organization Team','Account Settings']),'Shared sidebar settings dropdown exposes workspace settings links');
