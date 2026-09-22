@@ -1,12 +1,10 @@
 <?php
-require __DIR__.'/bootstrap.php';require __DIR__.'/bootstrap_auth.php'; require_login(); require_permission('audit.view'); $tid=require_tour();
-$q=db()->prepare("SELECT a.*,COALESCE(ad.username,'System') admin_name FROM audit_log a LEFT JOIN admins ad ON ad.id=a.admin_id WHERE (a.entity_type IS NULL OR a.entity_type<>'') ORDER BY a.id DESC LIMIT 500");
-$q->execute(); $rows=$q->fetchAll();
-?>
-<!doctype html><html><head><?php include __DIR__.'/partials/head.php';?><style>
-.log-action{font-weight:800;color:#147d43}.details{max-width:420px;word-break:break-word}
-</style></head><body><?php include __DIR__.'/partials/nav.php';?><main class="wrap">
-<section class="card"><div class="head"><div><div class="eyebrow">AUDIT</div><h2>Activity Log</h2><p class="muted">Latest 500 actions</p></div><a class="btn secondary" href="admin_tools.php">Back</a></div>
-<div class="table-wrap responsive-table"><table><thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>
-<?php foreach($rows as $r):?><tr><td><?=h($r['created_at'])?></td><td><?=h($r['admin_name'])?></td><td class="log-action"><?=h($r['action'])?></td><td><?=h(($r['entity_type']??'').' '.($r['entity_id']??''))?></td><td class="details"><?=h($r['details']??'')?></td></tr><?php endforeach;?>
-</tbody></table></div></section></main></body></html>
+declare(strict_types=1);
+require __DIR__.'/bootstrap.php';
+saas_require_login();
+$db=saas_db();
+$uid=saas_user_id();
+$q=$db->prepare('SELECT 1 FROM super_admins WHERE user_id=? LIMIT 1');$q->execute([$uid]);
+if(!$q->fetchColumn()){http_response_code(403);exit('403 Forbidden — Super Admin access required.');}
+$rows=$db->query("SELECT a.*,COALESCE(u.name,'System') actor_name,o.name organization_name FROM audit_log a LEFT JOIN users u ON u.id=a.user_id LEFT JOIN organizations o ON o.id=a.organization_id ORDER BY a.id DESC LIMIT 500")->fetchAll();
+?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GoTM — Super Admin Audit Log</title><link rel="stylesheet" href="assets/app.css"><style>body{background:#f5f7fb}.wrap{max-width:1200px;margin:auto;padding:28px 16px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid #eef0f2;text-align:left;font-size:13px;vertical-align:top}.table-wrap{overflow:auto}.muted{color:#667085;font-size:12px}.action{font-weight:800}</style></head><body><main class="wrap"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><div><div class="eyebrow">GOTM SYSTEM ADMIN</div><h1>Audit Log</h1><p class="muted">Latest 500 platform actions</p></div><a class="btn ghost" href="super_admin.php">Back to Super Admin</a></div><section class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Organization</th><th>Action</th><th>Entity</th><th>Details</th><th>IP</th></tr></thead><tbody><?php foreach($rows as $r):?><tr><td><?=saas_h($r['created_at'])?></td><td><?=saas_h($r['actor_name'])?></td><td><?=saas_h($r['organization_name']??'—')?></td><td class="action"><?=saas_h($r['action'])?></td><td><?=saas_h(($r['entity_type']??'').' '.($r['entity_id']??''))?></td><td><?=saas_h($r['details']??'')?></td><td><?=saas_h($r['ip_address']??'')?></td></tr><?php endforeach;?></tbody></table></div></section></main></body></html>
