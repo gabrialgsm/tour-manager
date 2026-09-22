@@ -88,14 +88,17 @@ button:disabled{opacity:.55;cursor:not-allowed}
   const status=document.getElementById('slugStatus');
   const button=document.getElementById('createOrganizationBtn');
   const form=document.getElementById('organizationForm');
+
   let manuallyEdited=false;
+  let lastAutoSlug='';
   let timer=null;
   let requestId=0;
   let available=false;
 
   function slugify(value){
-    return value.toString().normalize('NFKD')
-      .replace(/[\\u0300-\\u036f]/g,'')
+    return String(value || '')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g,'')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g,'-')
       .replace(/^-+|-+$/g,'')
@@ -107,9 +110,18 @@ button:disabled{opacity:.55;cursor:not-allowed}
     status.textContent=message || '';
   }
 
+  function updateAutoSlug(){
+    if(manuallyEdited) return;
+    const next=slugify(nameInput.value);
+    slugInput.value=next;
+    lastAutoSlug=next;
+    scheduleCheck();
+  }
+
   async function checkSlug(){
     const slug=slugify(slugInput.value);
     if(slugInput.value!==slug) slugInput.value=slug;
+
     available=false;
     if(!slug){
       setStatus('','');
@@ -135,7 +147,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
       const data=await response.json();
       if(current!==requestId) return;
       available=Boolean(data.available);
-      setStatus(available?'available':'unavailable',data.message || (available?'Slug is available.':'Slug is not available.'));
+      setStatus(
+        available ? 'available' : 'unavailable',
+        data.message || (available ? 'Slug is available.' : 'Slug is not available.')
+      );
       button.disabled=!available;
     }catch(error){
       if(current!==requestId) return;
@@ -150,20 +165,20 @@ button:disabled{opacity:.55;cursor:not-allowed}
     timer=setTimeout(checkSlug,350);
   }
 
-  nameInput.addEventListener('input',function(){
-    if(!manuallyEdited){
-      slugInput.value=slugify(nameInput.value);
-      scheduleCheck();
-    }
-  });
+  nameInput.addEventListener('input', updateAutoSlug);
 
-  slugInput.addEventListener('input',function(){
-    manuallyEdited=true;
+  slugInput.addEventListener('input', function(){
+    // The first real edit switches this field to manual mode.
+    // After that, changing the organization name will never overwrite it.
+    if(slugInput.value !== lastAutoSlug) manuallyEdited=true;
     slugInput.value=slugify(slugInput.value);
     scheduleCheck();
   });
 
   form.addEventListener('submit',function(event){
+    const slug=slugify(slugInput.value);
+    slugInput.value=slug;
+
     if(!available){
       event.preventDefault();
       checkSlug();
@@ -171,10 +186,14 @@ button:disabled{opacity:.55;cursor:not-allowed}
     }
   });
 
+  // Initial page load: generate the slug once from the current name.
   if(nameInput.value && !slugInput.value){
-    slugInput.value=slugify(nameInput.value);
+    updateAutoSlug();
+  }else if(slugInput.value){
+    lastAutoSlug=slugify(slugInput.value);
+    slugInput.value=lastAutoSlug;
+    scheduleCheck();
   }
-  if(slugInput.value) scheduleCheck();
 })();
 </script>
 </body>
