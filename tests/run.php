@@ -354,6 +354,22 @@ test_assert(
 );
 
 // -------------------------------------------------------------------------
+// Extended Super Admin SaaS controls.
+// -------------------------------------------------------------------------
+$superPlansText = file_text('super_admin_plans.php');
+test_assert(
+    $superPlansText !== '' &&
+    has_all($superPlansText, ['super_admins', 'saas_check_csrf()', 'saas_plan_entitlements', 'ON DUPLICATE KEY UPDATE', 'super_admin.entitlement_updated']),
+    'Super Admin can securely manage plan entitlements'
+);
+$expiryText = file_text('bin/subscription_expiry.php');
+test_assert(
+    $expiryText !== '' &&
+    has_all($expiryText, ['PHP_SAPI', 'PAST_DUE', 'current_period_end', 'NOW()']),
+    'Subscription expiry maintenance job marks overdue subscriptions PAST_DUE'
+);
+
+// -------------------------------------------------------------------------
 // Organization / team management contracts.
 // -------------------------------------------------------------------------
 
