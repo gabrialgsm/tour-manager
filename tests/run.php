@@ -451,6 +451,8 @@ if ($failures) {
 }
 
 echo "All automated tests passed.\n";
+$passengerText=file_text('passengers.php');
+test_assert($passengerText!=='' && has_all($passengerText,['gotm-logo.png','features.php','expenses.php','income.php','tickets.php','tour_team.php','recentProfiles','reusable-list']),'Passenger page uses the shared-style sidebar and shows reusable passenger profiles');
 $toursText=file_text('tours.php');
 test_assert($toursText!=='' && has_all($toursText,['gotm-logo.png','settingsBtn','settingsMenu','tour_edit.php','public_urls.php','billing.php','team.php','account_settings.php','logout.php']),'Tours page uses the GoTM sidebar and settings menu');
 test_assert(substr($toursText,strpos($toursText,'<div class="brand">'),250)===false,'Tours sidebar does not duplicate the GoTM logo markup');
