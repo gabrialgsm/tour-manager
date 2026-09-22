@@ -190,7 +190,7 @@ th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;vertical-align:t
 <body>
 <main class="wrap">
 <p><a href="dashboard.php">← Dashboard</a></p>
-<h1>Expenses</h1>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>Expenses</h1><div style="display:flex;gap:7px"><a class="export-btn" target="_blank" href="export.php?type=expenses&format=pdf">Print / PDF</a><a class="export-btn" href="export.php?type=expenses&format=excel">Excel</a></div></div>
 <p class="muted">Track tour costs and keep the total visible for the current tour.</p>
 
 <?php if($ok):?><div class="msg ok"><?=saas_h($ok)?></div><?php endif;?>
