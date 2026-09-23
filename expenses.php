@@ -174,7 +174,7 @@ label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
 input,textarea,button{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;font:inherit}
 textarea{min-height:80px;resize:vertical}
 button{margin-top:12px;background:#172033;color:#fff;border-color:#172033;cursor:pointer;font-weight:700}
-.danger{background:#fff;color:#b42318;border-color:#fecdca;margin:0;width:auto;padding:7px 10px}.edit-btn{background:#eef4ff;color:#155eef;border-color:#c7d7fe;margin:0;width:auto;padding:7px 10px}.action-row{display:flex;gap:7px;flex-wrap:wrap}.modal{position:fixed;inset:0;background:#0b1f3388;display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal.open{display:flex}.modal-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px #0003}.modal-actions{display:flex;gap:10px}.modal-actions button{margin:0}.modal-actions .cancel{background:#fff;color:#172033;border-color:#d0d5dd}
+.export-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.export-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 13px;border:1px solid #94a3b8;border-radius:9px;background:#fff;color:#0b2a49;text-decoration:none;font-size:12px;font-weight:800;box-shadow:0 2px 5px #00000012}.export-btn.pdf{border-color:#f0a800;background:#fff8e7;color:#8a5600}.export-btn.excel{border-color:#6bbf8a;background:#effbf3;color:#176b3a}.danger{background:#fff;color:#b42318;border-color:#fecdca;margin:0;width:auto;padding:7px 10px}.edit-btn{background:#eef4ff;color:#155eef;border-color:#c7d7fe;margin:0;width:auto;padding:7px 10px}.action-row{display:flex;gap:7px;flex-wrap:wrap}.modal{position:fixed;inset:0;background:#0b1f3388;display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}.modal.open{display:flex}.modal-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px #0003}.modal-actions{display:flex;gap:10px}.modal-actions button{margin:0}.modal-actions .cancel{background:#fff;color:#172033;border-color:#d0d5dd}
 .msg{padding:11px;border-radius:9px;margin-bottom:15px}
 .ok{background:#ecfdf3;color:#067647}
 .err{background:#fef3f2;color:#b42318}
@@ -190,7 +190,7 @@ th,td{padding:11px;border-bottom:1px solid #eee;text-align:left;vertical-align:t
 <body>
 <main class="wrap">
 <p><a href="dashboard.php">← Dashboard</a></p>
-<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>Expenses</h1><div style="display:flex;gap:7px"><a class="export-btn" target="_blank" href="export.php?type=expenses&format=pdf">Print / PDF</a><a class="export-btn" href="export.php?type=expenses&format=excel">Excel</a></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>Expenses</h1><div class="export-actions"><a class="export-btn pdf" target="_blank" href="export.php?type=expenses&format=pdf">▣ Print / PDF</a><a class="export-btn excel" href="export.php?type=expenses&format=excel">▤ Export Excel</a></div></div>
 <p class="muted">Track tour costs and keep the total visible for the current tour.</p>
 
 <?php if($ok):?><div class="msg ok"><?=saas_h($ok)?></div><?php endif;?>
