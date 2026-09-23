@@ -118,8 +118,8 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
  @page{size:A4 portrait;margin:0}
  html,body{margin:0!important;padding:0!important;background:#fff!important}
  .toolbar{display:none!important}
- .sheet{display:block!important;visibility:visible!important;position:relative!important;width:210mm!important;min-height:297mm!important;height:auto!important;margin:0!important;padding:7mm 9mm 6mm!important;box-shadow:none!important;overflow:visible!important}
- .header,.title,.stats,.bus-frame,.footer{visibility:visible!important}
+ .sheet{display:block!important;visibility:visible!important;position:relative!important;width:210mm!important;min-height:0!important;height:auto!important;margin:0!important;padding:7mm 9mm 6mm!important;box-shadow:none!important;overflow:visible!important}
+ .header,.title,.stats,.bus-frame{visibility:visible!important}.footer{display:none!important}
  a{color:inherit;text-decoration:none}
 }
 @media(max-width:850px){
