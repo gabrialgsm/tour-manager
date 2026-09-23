@@ -412,7 +412,7 @@ test_assert(
 $tourTeamText = file_text('tour_team.php');
 test_assert(
     $tourTeamText !== '' &&
-    has_all($tourTeamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'tour_members', 'organization_id', 'FOR UPDATE']),
+    has_all($tourTeamText, ['saas_require_permission(\'member.manage\')', 'saas_check_csrf()', 'tour_members', 'organization_id', 'FOR UPDATE', 'Available members', 'Assigned to this tour', 'Assign to this tour']),
     'Tour team management is organization-scoped with permission, CSRF and row locking'
 );
 test_assert(
