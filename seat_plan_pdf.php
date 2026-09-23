@@ -116,10 +116,38 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
 @page{size:A4 portrait;margin:0}
 @media print{
  @page{size:A4 portrait;margin:0}
- html,body{margin:0!important;padding:0!important;background:#fff!important}
+ html,body{
+  width:210mm!important;
+  height:297mm!important;
+  min-height:297mm!important;
+  max-height:297mm!important;
+  margin:0!important;
+  padding:0!important;
+  background:#fff!important;
+  overflow:hidden!important;
+ }
  .toolbar{display:none!important}
- .sheet{display:block!important;visibility:visible!important;position:relative!important;width:210mm!important;height:297mm!important;min-height:297mm!important;margin:0!important;padding:5mm 8mm 4mm!important;box-shadow:none!important;overflow:hidden!important}
- .header,.title,.stats,.bus-frame{visibility:visible!important}.footer{display:none!important}
+ .sheet{
+  display:block!important;
+  visibility:visible!important;
+  position:relative!important;
+  width:210mm!important;
+  height:297mm!important;
+  min-height:297mm!important;
+  max-height:297mm!important;
+  margin:0!important;
+  padding:5mm 8mm 4mm!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  break-before:avoid!important;
+  break-after:avoid!important;
+  break-inside:avoid!important;
+  page-break-before:avoid!important;
+  page-break-after:avoid!important;
+  page-break-inside:avoid!important;
+ }
+ .header,.title,.stats,.bus-frame{visibility:visible!important}
+ .footer{display:none!important}
  a{color:inherit;text-decoration:none}
 }
 @media(max-width:850px){
