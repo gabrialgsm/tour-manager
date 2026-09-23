@@ -468,11 +468,11 @@ test_assert(
     has_all($dashText,['Tour note','Schedule','Bus seat plan','Accommodation','Recent passengers','rooms.php','seat_plan.php','buses.php','data-bus-tab','seatModal','dragstart']),
     'Tour dashboard exposes shared-shell operations, default bus seat plan and passenger seat assignment'
 );
+$shellText=file_text('assets/app-shell.js');
 test_assert(
     $shellText!=='' && has_all($shellText,['export-page']),
     'Export pages bypass the shared workspace shell for clean printing'
 );
-$shellText=file_text('assets/app-shell.js');
 test_assert($shellText!=='' && has_all($shellText,['gm-sidebar','payments.php','expenses.php','tour_team.php','tickets.php','income.php','features.php','Settings','Logout']),'Shared workspace shell provides the dashboard sidebar navigation');
 $exportText=file_text('export.php');
 test_assert(
