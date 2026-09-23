@@ -77,7 +77,9 @@ if (saas_authenticated() && !defined('GOTM_SHELL_BUFFER')) {
         ob_start(static function (string $html): string {
             if (stripos($html, '</body>') === false || stripos($html, 'text/html') === false && stripos($html, '<!doctype') === false && stripos($html, '<html') === false) return $html;
             if (stripos($html, 'assets/app-shell.js') !== false || stripos($html, 'class="gm-shell"') !== false) return $html;
-            return str_ireplace('</body>', '<script src="/assets/app-shell.js?v=1"></script></body>', $html);
+            $css='<link rel="stylesheet" data-gotm-app-css href="/assets/app.css?v=5">';
+            $html=preg_replace('/<\/head>/i',$css.'</head>',$html,1)??$html;
+            return str_ireplace('</body>', '<script src="/assets/app-shell.js?v=2"></script></body>', $html);
         });
     }
 }
