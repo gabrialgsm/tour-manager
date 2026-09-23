@@ -119,24 +119,30 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
 
  html,body{
   width:210mm!important;
-  min-width:210mm!important;
-  height:auto!important;
-  min-height:297mm!important;
+  height:297mm!important;
   margin:0!important;
   padding:0!important;
   background:#fff!important;
-  overflow:visible!important;
+  overflow:hidden!important;
  }
 
- /* This page is already a standalone seat-plan document. Hide only its controls. */
- .toolbar{display:none!important}
+ /* The application shell may wrap this page. Hide the shell visually,
+    then explicitly re-enable the printable sheet and everything inside it. */
+ body *{
+  visibility:hidden!important;
+ }
+
+ .sheet,
+ .sheet *{
+  visibility:visible!important;
+ }
 
  .sheet{
   display:block!important;
-  position:relative!important;
-  left:auto!important;
-  top:auto!important;
-  z-index:auto!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  z-index:999999!important;
   width:210mm!important;
   height:297mm!important;
   min-height:297mm!important;
@@ -154,7 +160,11 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
   page-break-inside:avoid!important;
  }
 
- .footer{display:none!important}
+ .toolbar,
+ .footer{
+  display:none!important;
+ }
+
  a{color:inherit;text-decoration:none}
 }
 @media(max-width:850px){
