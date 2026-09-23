@@ -75,8 +75,17 @@ body{margin:0;background:#eef2f6;color:#172033;font-family:Arial,Helvetica,sans-
 table{width:100%;border-collapse:collapse;font-size:11px}th{background:#0b2a49;color:#fff;text-align:left;padding:8px}td{border:1px solid #e4e7ec;padding:7px}tbody tr:nth-child(even){background:#f8fafc}
 .footer{margin-top:25px;padding-top:12px;border-top:1px solid #e4e7ec;display:flex;justify-content:space-between;color:#667085;font-size:9px}
 @media print{
- body{background:#fff}.toolbar{display:none}.sheet{margin:0;max-width:none;box-shadow:none}.cover{break-inside:avoid}
- a{color:inherit;text-decoration:none}.section{break-inside:avoid}
+ @page{size:A4;margin:10mm 11mm 12mm}
+ html,body{margin:0!important;padding:0!important;background:#fff!important}
+ body{overflow:visible!important}
+ body > *:not(.sheet):not(script){display:none!important}
+ .toolbar{display:none!important}
+ .sheet{display:block!important;visibility:visible!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;box-shadow:none!important;background:#fff!important}
+ .header,.cover,.body,.section,.footer{visibility:visible}
+ .cover{break-inside:avoid;page-break-inside:avoid}
+ .section{break-inside:avoid;page-break-inside:avoid}
+ .card,.feature,.schedule-item,table{break-inside:avoid;page-break-inside:avoid}
+ a{color:inherit;text-decoration:none}
 }
 @media(max-width:650px){
  .sheet{margin:0}.header,.body{padding:17px}.intro,.features,.meta{grid-template-columns:1fr}.cover{height:180px}
