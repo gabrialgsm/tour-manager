@@ -78,9 +78,9 @@ table{width:100%;border-collapse:collapse;font-size:11px}th{background:#0b2a49;c
  @page{size:A4;margin:10mm 11mm 12mm}
  html,body{margin:0!important;padding:0!important;background:#fff!important}
  body{overflow:visible!important}
- body > *:not(.sheet):not(script){display:none!important}
  .toolbar{display:none!important}
- .sheet{display:block!important;visibility:visible!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;box-shadow:none!important;background:#fff!important}
+ main.sheet{display:block!important;visibility:visible!important;position:relative!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;box-shadow:none!important;background:#fff!important}
+ main.sheet *{visibility:visible!important}
  .header,.cover,.body,.section,.footer{visibility:visible}
  .cover{break-inside:avoid;page-break-inside:avoid}
  .section{break-inside:avoid;page-break-inside:avoid}
