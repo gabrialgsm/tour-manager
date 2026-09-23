@@ -507,11 +507,11 @@ $tourCreateText=file_text('tour_create.php');$tourEditText=file_text('tour_edit.
 test_assert($tourCreateText!==''&&has_all($tourCreateText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour create supports image uploads and departure options');
 test_assert($tourEditText!==''&&has_all($tourEditText,['multipart/form-data','banner_upload','logo_upload','departure_options','1600 × 600','500 × 150','upload_tour_image']),'Tour edit supports image uploads and departure options');
 test_assert(has_all($tourEditText,['slugInput','Public URL / slug','UPDATE tours SET name=?,slug=?']),'Tour edit exposes and saves the public slug');
+$passengerText=file_text('passengers.php');
 test_assert(
     $passengerText!=='' && has_all($passengerText,['Export All Passengers (PDF)','Export All Passengers (Excel)','export.php?type=passengers&format=pdf','export.php?type=passengers&format=excel']),
     'Passenger page exposes explicit all-passenger PDF and Excel export actions'
 );
-$passengerText=file_text('passengers.php');
 test_assert($passengerText!=='' && has_all($passengerText,['gotm-logo.png','features.php','expenses.php','income.php','tickets.php','tour_team.php','recentProfiles','reusable-list','departureOptions','Select departure point']),'Passenger page uses the shared-style sidebar and shows reusable passenger profiles');
 $toursText=file_text('tours.php');
 test_assert($toursText!=='' && has_all($toursText,['gotm-logo.png','settingsBtn','settingsMenu','tour_edit.php','public_urls.php','billing.php','team.php','account_settings.php','logout.php']),'Tours page uses the GoTM sidebar and settings menu');
