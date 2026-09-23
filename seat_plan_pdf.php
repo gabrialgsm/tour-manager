@@ -100,7 +100,7 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
 .seat{min-width:0;flex:1;min-height:9.2mm;border:1.4px solid #9ac8aa;border-radius:9px;background:#effaf2;padding:1mm .8mm .7mm;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
 .seat.occupied{background:#e8f2ff;border-color:#8fb4dc}
 .seat-code{font-size:9px;line-height:1;font-weight:950;color:#0b2a49}
-.seat-name{width:100%;margin-top:.7mm;font-size:7px;line-height:1.05;font-weight:800;color:#344054;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat-name{width:100%;margin-top:.7mm;font-size:12px;line-height:1.05;font-weight:800;color:#344054;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .front-single{margin-bottom:1.5mm}
 .front-single .seat{max-width:22mm;flex:none}
 .last-row{margin-top:1mm;padding-top:.8mm;border-top:1px solid #dce4eb}
