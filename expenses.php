@@ -169,7 +169,7 @@ $total = (float)$q->fetchColumn();
 body{margin:0;background:#f4f7fb;color:#172033;font-family:Inter,Arial,sans-serif}
 .wrap{max-width:1180px;margin:25px auto;padding:0 16px}
 .box{background:#fff;border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 6px 22px #0000000b}
-.grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:18px}.box{min-width:0}.tablewrap{min-width:0}
 label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
 input,textarea,button{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;font:inherit}
 textarea{min-height:80px;resize:vertical}
