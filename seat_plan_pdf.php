@@ -116,6 +116,8 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
 @page{size:A4 portrait;margin:0}
 @media print{
  @page{size:A4 portrait;margin:0}
+
+ /* Print ONLY the seat-plan sheet. Hide any app/dashboard layout. */
  html,body{
   width:210mm!important;
   height:297mm!important;
@@ -126,17 +128,24 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
   background:#fff!important;
   overflow:hidden!important;
  }
- .toolbar{display:none!important}
- .sheet{
+ body{
+  visibility:hidden!important;
+  position:relative!important;
+ }
+ body::before,body::after{display:none!important;content:none!important}
+ body>*{display:none!important}
+ body>.sheet{
   display:block!important;
   visibility:visible!important;
   position:relative!important;
+  z-index:2147483647!important;
   width:210mm!important;
   height:297mm!important;
   min-height:297mm!important;
   max-height:297mm!important;
   margin:0!important;
   padding:5mm 8mm 4mm!important;
+  background:#fff!important;
   box-shadow:none!important;
   overflow:hidden!important;
   break-before:avoid!important;
@@ -146,7 +155,8 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
   page-break-after:avoid!important;
   page-break-inside:avoid!important;
  }
- .header,.title,.stats,.bus-frame{visibility:visible!important}
+ body>.sheet *{visibility:visible!important}
+ .toolbar{display:none!important}
  .footer{display:none!important}
  a{color:inherit;text-decoration:none}
 }
