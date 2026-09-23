@@ -117,28 +117,33 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
 @media print{
  @page{size:A4 portrait;margin:0}
 
- /* Print ONLY the seat-plan sheet. Hide any app/dashboard layout. */
+ /* Keep the document body alive, but make ONLY the seat-plan tree visible. */
  html,body{
   width:210mm!important;
   height:297mm!important;
-  min-height:297mm!important;
-  max-height:297mm!important;
   margin:0!important;
   padding:0!important;
   background:#fff!important;
   overflow:hidden!important;
  }
- body{
+
+ /* Hide every element in the page, including any inherited app/sidebar UI. */
+ body *{
   visibility:hidden!important;
-  position:relative!important;
  }
- body::before,body::after{display:none!important;content:none!important}
- body>*{display:none!important}
- body>.sheet{
-  display:block!important;
+
+ /* Re-enable only the actual printable sheet and its children. */
+ body > .sheet,
+ body > .sheet *{
   visibility:visible!important;
-  position:relative!important;
-  z-index:2147483647!important;
+ }
+
+ body > .sheet{
+  display:block!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  z-index:999999!important;
   width:210mm!important;
   height:297mm!important;
   min-height:297mm!important;
@@ -155,9 +160,12 @@ html,body{margin:0;padding:0;background:#eef2f6;color:#10243a;font-family:Inter,
   page-break-after:avoid!important;
   page-break-inside:avoid!important;
  }
- body>.sheet *{visibility:visible!important}
- .toolbar{display:none!important}
- .footer{display:none!important}
+
+ .toolbar,
+ .footer{
+  display:none!important;
+ }
+
  a{color:inherit;text-decoration:none}
 }
 @media(max-width:850px){
