@@ -72,7 +72,7 @@ require_once __DIR__ . '/entitlements.php';
 if (saas_authenticated() && !defined('GOTM_SHELL_BUFFER')) {
     define('GOTM_SHELL_BUFFER', true);
     $gotmScript = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
-    $gotmSkipShell = in_array($gotmScript, ['index.php','login.php','signup.php','logout.php','public_tour.php','public_booking.php','public_checkout.php','public_features.php','public_room_select.php','public_seat_select.php','passenger_dashboard.php','passenger_register.php','passenger_auth.php','passenger_password_reset.php','ticket_verify.php','qr.php','qr_image.php','api.php'], true) || str_starts_with($gotmScript, 'passenger_');
+    $gotmSkipShell = in_array($gotmScript, ['index.php','login.php','signup.php','logout.php','public_tour.php','public_booking.php','public_checkout.php','public_features.php','public_room_select.php','public_seat_select.php','passenger_dashboard.php','passenger_register.php','passenger_auth.php','passenger_password_reset.php','ticket_verify.php','qr.php','qr_image.php','api.php','tour_pdf.php'], true) || str_starts_with($gotmScript, 'passenger_');
     if (!$gotmSkipShell) {
         ob_start(static function (string $html): string {
             if (stripos($html, '</body>') === false || stripos($html, 'text/html') === false && stripos($html, '<!doctype') === false && stripos($html, '<html') === false) return $html;
